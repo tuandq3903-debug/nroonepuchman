@@ -1,9 +1,19 @@
 
-.codegpt
-# Loại trừ các thư mục và file không cần thiết
-Temp/
-Library/
+# PROJECT_NRO_248_6Tab — local ignore rules.
+# Parent .gitignore (workspace root) already excludes the standard Unity
+# meta-noise (Library/, Temp/, Logs/, UserSettings/, *.csproj, *.sln…).
+# This file adds only project-specific extras.
+
+# Project-local
+.codegpt/
 .vscode/
-*.sln
-*.csproj
+
+# Large binary artefacts / upgrade logs never needed in VCS
 *.htm
+
+# Optional rider / rider cache (parent covers most, this catches edge cases)
+.idea/
+*.sln.DotSettings.user
+
+# Long-lived scratch from opening scenes
+*.tmp
