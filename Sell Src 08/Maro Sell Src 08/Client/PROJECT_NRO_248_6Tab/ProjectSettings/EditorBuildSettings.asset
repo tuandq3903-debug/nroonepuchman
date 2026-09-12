@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/NRO1.unity
+    path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
     path: Assets/Scenes/NRO2.unity
@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NRO5.unity
     guid: b6ea9c784653dba43bd1e97bcd49c3a8
+  - enabled: 1
+    path: Assets/Scenes/NROL.unity
+    guid: 138601ca868562a4198e95db91d7a87b
   m_configObjects: {}

@@ -212,6 +212,7 @@ namespace Game3
 		public static string[] LOGINLABELS = new string[]
 		{
 			string.Empty,
+			string.Empty,
 			string.Empty
 		};
 
@@ -462,12 +463,14 @@ namespace Game3
 			string.Empty,
 			string.Empty,
 			string.Empty,
+			string.Empty,
 			string.Empty
 		};
 
 		// Token: 0x040042F5 RID: 17141
 		public static string[] key_skill = new string[]
 		{
+			string.Empty,
 			string.Empty,
 			string.Empty,
 			string.Empty,

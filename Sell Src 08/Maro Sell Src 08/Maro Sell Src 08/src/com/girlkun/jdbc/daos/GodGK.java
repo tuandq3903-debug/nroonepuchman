@@ -173,14 +173,25 @@ public class GodGK {
                             player.vip = Byte.parseByte(String.valueOf(dataArray.get(5)));
                             player.timevip = Long.parseLong(String.valueOf(dataArray.get(6)));
                             player.point_kibi = Integer.parseInt(String.valueOf(dataArray.get(7)));
-                            dataArray.clear();
+                            if (dataArray != null) {
+                                dataArray.clear();
+                            }
 
                             dataArray = (JSONArray) JSONValue.parse(rs.getString("vodaisinhtu"));
-                            player.haveRewardVDST = Boolean.parseBoolean(dataArray.get(0).toString());
-                            player.thoiVangVoDaiSinhTu = Integer.parseInt(dataArray.get(1).toString());
-                            player.lastTimePKVoDaiSinhTu = Long.parseLong(dataArray.get(2).toString());
-                            player.timePKVDST = Long.parseLong(dataArray.get(3).toString());
-                            dataArray.clear();
+                            if (dataArray != null && dataArray.size() >= 4) {
+                                player.haveRewardVDST = Boolean.parseBoolean(dataArray.get(0).toString());
+                                player.thoiVangVoDaiSinhTu = Integer.parseInt(dataArray.get(1).toString());
+                                player.lastTimePKVoDaiSinhTu = Long.parseLong(dataArray.get(2).toString());
+                                player.timePKVDST = Long.parseLong(dataArray.get(3).toString());
+                            } else {
+                                player.haveRewardVDST = false;
+                                player.thoiVangVoDaiSinhTu = 0;
+                                player.lastTimePKVoDaiSinhTu = 0L;
+                                player.timePKVDST = 0L;
+                            }
+                            if (dataArray != null) {
+                                dataArray.clear();
+                            }
 
                             dataArray = (JSONArray) JSONValue.parse(rs.getString("diem_danh"));
                             player.CheckDayOnl = Byte.parseByte(String.valueOf(dataArray.get(0)));
@@ -643,7 +654,7 @@ public class GodGK {
 
                             //data skill shortcut
                             dataArray = (JSONArray) jv.parse(rs.getString("skills_shortcut"));
-                            for (int i = 0; i < dataArray.size(); i++) {
+                            for (int i = 0; i < dataArray.size() && i < player.playerSkill.skillShortCut.length; i++) {
                                 player.playerSkill.skillShortCut[i] = Byte.parseByte(String.valueOf(dataArray.get(i)));
                             }
                             for (int i : player.playerSkill.skillShortCut) {
@@ -1482,7 +1493,7 @@ public class GodGK {
 
                 //data skill shortcut
                 dataArray = (JSONArray) jv.parse(rs.getString("skills_shortcut"));
-                for (int i = 0; i < dataArray.size(); i++) {
+                for (int i = 0; i < dataArray.size() && i < player.playerSkill.skillShortCut.length; i++) {
                     player.playerSkill.skillShortCut[i] = Byte.parseByte(String.valueOf(dataArray.get(i)));
                 }
                 for (int i : player.playerSkill.skillShortCut) {

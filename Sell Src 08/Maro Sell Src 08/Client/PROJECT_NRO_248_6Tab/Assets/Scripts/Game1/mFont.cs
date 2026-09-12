@@ -565,6 +565,7 @@ namespace Game1
 				break;
 			}
 			gUIStyle.normal.textColor = this.color1;
+			gUIStyle.hover.textColor = color1;
 			g.drawString(st, (int)num, (int)num2, gUIStyle);
 		}
 

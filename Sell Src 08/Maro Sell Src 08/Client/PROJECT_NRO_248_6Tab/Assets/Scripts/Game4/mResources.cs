@@ -212,6 +212,7 @@ namespace Game4
 		public static string[] LOGINLABELS = new string[]
 		{
 			string.Empty,
+			string.Empty,
 			string.Empty
 		};
 
@@ -462,12 +463,14 @@ namespace Game4
 			string.Empty,
 			string.Empty,
 			string.Empty,
+			string.Empty,
 			string.Empty
 		};
 
 		// Token: 0x04003076 RID: 12406
 		public static string[] key_skill = new string[]
 		{
+			string.Empty,
 			string.Empty,
 			string.Empty,
 			string.Empty,

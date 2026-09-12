@@ -271,7 +271,7 @@ namespace Game3
 		public void onOSkill(sbyte[] oSkillID)
 		{
 			Cout.println("GET onScreenSkill!");
-			GameScr.onScreenSkill = new Skill[10];
+			GameScr.onScreenSkill = new Skill[11];
 			if (oSkillID == null)
 			{
 				this.loadDefaultonScreenSkill();
@@ -295,7 +295,7 @@ namespace Game3
 		public void onKSkill(sbyte[] kSkillID)
 		{
 			Cout.println("GET KEYSKILL!");
-			GameScr.keySkill = new Skill[10];
+			GameScr.keySkill = new Skill[11];
 			if (kSkillID == null)
 			{
 				this.loadDefaultKeySkill();
@@ -378,7 +378,7 @@ namespace Game3
 		{
 			Skill skill = Char.myCharz().getSkill(skillTemplate);
 			MyVector myVector = new MyVector();
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 11; i++)
 			{
 				object p = new object[]
 				{
@@ -401,7 +401,7 @@ namespace Game3
 			Skill skill = Char.myCharz().getSkill(skillTemplate);
 			string[] array = (!TField.isQwerty) ? mResources.key_skill : mResources.key_skill_qwerty;
 			MyVector myVector = new MyVector();
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 11; i++)
 			{
 				MyVector myVector2 = myVector;
 				object p = new object[]
@@ -411,6 +411,7 @@ namespace Game3
 				};
 				myVector2.addElement(new Command(array[i], 11121, p));
 			}
+			UnityEngine.Debug.Log("doSetKeySkill: isQwerty=" + TField.isQwerty + ", menuItems=" + myVector.size());
 			GameCanvas.menu.startAt(myVector, 0);
 		}
 
@@ -7038,10 +7039,10 @@ namespace Game3
 		public static bool isUseTouch;
 
 		// Token: 0x04003DA0 RID: 15776
-		public static Skill[] keySkill = new Skill[10];
+		public static Skill[] keySkill = new Skill[11];
 
 		// Token: 0x04003DA1 RID: 15777
-		public static Skill[] onScreenSkill = new Skill[10];
+		public static Skill[] onScreenSkill = new Skill[11];
 
 		// Token: 0x04003DA2 RID: 15778
 		public Command cmdMenu;

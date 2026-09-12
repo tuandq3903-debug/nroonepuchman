@@ -22,6 +22,7 @@ import com.girlkun.models.player.Player;
 import com.girlkun.server.Manager;
 import com.girlkun.services.Service;
 import com.girlkun.services.func.TopService;
+import com.girlkun.utils.Logger;
 import com.girlkun.utils.Util;
 
 import java.util.ArrayList;
@@ -142,9 +143,9 @@ public class Map implements Runnable {
                     zone.update();
                 }
                 long timeDo = System.currentTimeMillis() - st;
-                Thread.sleep(1000 - timeDo);
+                Thread.sleep(Math.max(1L, 1000L - timeDo));
             } catch (Exception e) {
-//                Logger.logException(Map.class, e, "Lỗi update map " + this.mapName);
+                Logger.logException(Map.class, e, "Lỗi update map " + this.mapName);
             }
         }
     }

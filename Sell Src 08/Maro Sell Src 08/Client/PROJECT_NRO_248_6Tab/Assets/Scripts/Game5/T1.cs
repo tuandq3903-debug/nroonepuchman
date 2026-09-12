@@ -304,6 +304,7 @@ namespace Game5
 				"Vào\nphím 8",
 				"Vào\nphím 9",
 				"Vào\nphím 0"
+				,"Vào\nphím -"
 			};
 			mResources.key_skill = new string[]
 			{
@@ -312,11 +313,12 @@ namespace Game5
 				"Vào\nphím 9",
 				"Vào\nphím 10",
 				"Vào\nphím 11",
-				string.Empty,
-				string.Empty,
-				string.Empty,
-				string.Empty,
-				string.Empty
+				"Vào\nphím 12",
+				"Vào\nphím 13",
+				"Vào\nphím 14",
+				"Vào\nphím 15",
+				"Vào\nphím 16",
+				"Vào\nphím -"
 			};
 			mResources.SKILL_FAIL = "Chiêu đánh hiện tại của bạn chưa nâng cấp độ";
 			mResources.HP_EMPTY = "Đã hết đậu thần. Cậu hãy về thu hoạch thêm";

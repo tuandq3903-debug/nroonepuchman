@@ -184,16 +184,8 @@ public class Manager {
             MAPS.add(map);
             map.initMob(mapTemp.mobTemp, mapTemp.mobLevel, mapTemp.mobHp, mapTemp.mobX, mapTemp.mobY);
             map.initNpc(mapTemp.npcId, mapTemp.npcX, mapTemp.npcY);
+            new Thread(map, "Update map " + mapTemp.id).start();
         }
-        new Thread(() -> {
-            try {
-                long start = System.currentTimeMillis();
-                MAPS.forEach(m -> m.zones.forEach(z -> z.update()));
-                long delay = System.currentTimeMillis() - start;
-                TimeUnit.MILLISECONDS.sleep(500 - delay);
-            } catch (Exception e) {
-            }
-        }, "Update map").start();
         Referee r = new Referee();
         r.initReferee();
 
