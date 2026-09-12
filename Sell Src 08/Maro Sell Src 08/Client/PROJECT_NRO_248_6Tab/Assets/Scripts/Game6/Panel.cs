@@ -932,14 +932,10 @@ namespace Game6
 					{
 						if (item.itemOption[k].optionTemplate.name.StartsWith("$"))
 						{
-							empty = item.itemOption[k].getOptiongColor();
-							if (item.itemOption[k].param == 1)
+							empty = item.itemOption[k].getOptionString().Replace("$", string.Empty);
+							if (item.itemOption[k].param > 0)
 							{
 								text = text + "\n|1|1|" + empty;
-							}
-							if (item.itemOption[k].param == 0)
-							{
-								text = text + "\n|0|1|" + empty;
 							}
 						}
 						else

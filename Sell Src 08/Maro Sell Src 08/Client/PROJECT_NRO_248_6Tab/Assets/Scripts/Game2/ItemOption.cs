@@ -36,6 +36,12 @@ namespace Game2
 		// Token: 0x06002A55 RID: 10837 RVA: 0x0029B462 File Offset: 0x00299662
 		public string getOptionString()
 		{
+			if (this.param > 0 && !this.optionTemplate.name.Contains("#") && this.optionTemplate.id >= 136 && this.optionTemplate.id <= 144)
+			{
+				string optionName = this.optionTemplate.name.Replace("$", string.Empty);
+				if (this.optionTemplate.id == 137 || this.optionTemplate.id == 139) return optionName.Replace("#", this.param.ToString());
+				return optionName.Replace("+ sát thương", "+" + this.param.ToString() + "% sát thương").Replace("+sát thương", "+" + this.param.ToString() + "% sát thương").Replace("+ HP", "+" + this.param.ToString() + "% HP").Replace("+HP", "+" + this.param.ToString() + "% HP").Replace("+ KI", "+" + this.param.ToString() + "% KI").Replace("+KI", "+" + this.param.ToString() + "% KI");
+			}
 			return NinjaUtil.Replace(this.optionTemplate.name, "#", this.param.ToString() + string.Empty);
 		}
 
