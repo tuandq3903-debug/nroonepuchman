@@ -1,0 +1,70 @@
+/* CSS for Avatar rotation effect */
+.post-image img {
+    transition: transform 0.5s ease; /* Smooth transition */
+}
+
+/* Rotate the avatar when hovered */
+.post-image img:hover {
+    transform: rotate(360deg); /* 360 degree rotation */
+}
+/* Đảm bảo phần tử trái tim có thể di chuyển */
+.hearts {
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly; /* Căn trái tim ra đều */
+    width: 100%;
+    height: 0;
+    pointer-events: none; /* Đảm bảo không ảnh hưởng đến việc hover */
+}
+
+/* Các icon trái tim */
+.heart {
+    position: absolute;
+    bottom: -30px; /* Đặt trái tim ở dưới */
+    font-size: 20px; /* Kích thước trái tim */
+    opacity: 0; /* Ban đầu không hiển thị */
+    animation: flyUp 1s ease-in-out forwards; /* Áp dụng animation */
+}
+
+/* Khi hover vào chữ "Hướng dẫn Chơi Game", các trái tim bay lên */
+.content:hover .heart {
+    opacity: 1; /* Khi hover vào, trái tim sẽ hiển thị */
+}
+
+/* Animation cho các trái tim bay lên */
+@keyframes flyUp {
+    0% {
+        transform: translateY(0); /* Bắt đầu từ vị trí ban đầu */
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(-50px); /* Di chuyển lên trên */
+        opacity: 1;
+    }
+}
+
+/* Độ trễ cho mỗi trái tim để chúng không bay lên cùng lúc */
+.heart:nth-child(1) {
+    animation-delay: 0s; /* Trái tim đầu tiên bay lên ngay lập tức */
+}
+
+.heart:nth-child(2) {
+    animation-delay: 0.2s; /* Trái tim thứ hai bay lên sau 0.2s */
+}
+
+.heart:nth-child(3) {
+    animation-delay: 0.4s; /* Trái tim thứ ba bay lên sau 0.4s */
+}
+
+.heart:nth-child(4) {
+    animation-delay: 0.6s; /* Trái tim thứ tư bay lên sau 0.6s */
+}
+
+.heart:nth-child(5) {
+    animation-delay: 0.8s; /* Trái tim thứ năm bay lên sau 0.8s */
+}
+
+/* Thêm hiệu ứng hover cho chữ "Hướng dẫn Chơi Game" */
+.text-blue:hover {
+    color: #007bff;
+}

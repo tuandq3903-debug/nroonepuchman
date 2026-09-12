@@ -1,0 +1,26 @@
+RewriteEngine on
+RewriteBase /
+
+# Chuyển yêu cầu không phải là tập tin hoặc thư mục đến file có .php theo đường dẫn gốc
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ $1.php [L,QSA]
+
+# Chuyển hướng đến trang error.php khi file không tồn tại
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ error [L]
+
+ErrorDocument 500 http://localhost/error
+
+# Chặn truy cập vào thư mục
+Options -Indexes
+
+# Thêm .IPA vào trang
+AddType application/octet-stream .ipa
+
+# Bảo vệ tệp tin htaccess
+<Files .htaccess>
+    order allow,deny
+    deny from all
+</Files>

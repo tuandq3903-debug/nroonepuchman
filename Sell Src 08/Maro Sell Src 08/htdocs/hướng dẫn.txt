@@ -1,0 +1,1 @@
+1. chỉnh $dbname_sv  trong file connect.php + cauhinh.php
