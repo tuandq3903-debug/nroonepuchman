@@ -65,6 +65,12 @@ ExportedObj/
 *.slnx
 *.suo
 *.tmp
+
+# Node.js admin panel dependencies and local runtime files
+/Sell Src 08/htdocs/admin-panel/node_modules/
+/Sell Src 08/htdocs/admin-panel/*.log
+/Sell Src 08/htdocs/admin-panel/.env
+/Sell Src 08/htdocs/admin-panel/.env.*
 *.user
 *.userprefs
 *.pidb

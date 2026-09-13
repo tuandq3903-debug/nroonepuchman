@@ -1,0 +1,2914 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NRO Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/itemIcons.js"></script>
+    <style>
+        .item-icon-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 6px;
+        }
+        .item-row {
+            transition: background 0.2s;
+        }
+        .item-row:hover {
+            background: rgba(52, 152, 219, 0.1);
+            cursor: pointer;
+        }
+        .item-icon-large {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            margin: 0 auto;
+        }
+        .item-icon-large img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: -webkit-optimize-contrast;
+        }
+        .item-detail-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) {
+            .item-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-dragon"></i> NRO Admin</h2>
+                <span>Panel Quản Trị Server</span>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Tổng Quan</span>
+                </div>
+                <div class="nav-item" data-page="accounts">
+                    <i class="fas fa-users"></i>
+                    <span>Tài Khoản</span>
+                </div>
+                <div class="nav-item" data-page="players">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Nhân Vật</span>
+                </div>
+                <div class="nav-item" data-page="items">
+                    <i class="fas fa-gem"></i>
+                    <span>Vật Phẩm</span>
+                </div>
+                <div class="nav-item" data-page="giftcodes">
+                    <i class="fas fa-gift"></i>
+                    <span>Giftcode</span>
+                </div>
+                <div class="nav-item" data-page="shop">
+                    <i class="fas fa-store"></i>
+                    <span>Cửa Hàng</span>
+                </div>
+                <div class="nav-item" data-page="costumes">
+                    <i class="fas fa-mask"></i>
+                    <span>Cải Trang</span>
+                </div>
+                <div class="nav-item" data-page="bosses">
+                    <i class="fas fa-skull-crossbones"></i>
+                    <span>Quản Lý Boss</span>
+                </div>
+                <div class="nav-item" data-page="history">
+                    <i class="fas fa-history"></i>
+                    <span>Lịch Sử</span>
+                </div>
+                <div class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài Đặt</span>
+                </div>
+                <div class="nav-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng Xuất</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <h1 id="pageTitle"><i class="fas fa-home"></i> Tổng Quan</h1>
+                <div class="top-bar-info">
+                    <div class="server-status">
+                        <span class="status-dot online"></span>
+                        <span>Server Online</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <span id="userName">Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content Container -->
+            <div id="pageContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modalContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentPage = 'dashboard';
+        let currentAdmin = null;
+        
+        // Global item data cache
+        let itemsCache = null;
+        
+        // Global type definitions (based on real database type_item table)
+        const typeNames = {
+            0: 'Áo vải', 1: 'Quần', 2: 'Găng tay', 3: 'Giày', 4: 'Rada',
+            5: 'Cải trang Avatar', 6: 'Đậu thần', 7: 'Sách kỹ năng',
+            8: 'Nhiệm vụ', 9: 'Vàng', 10: 'Ngọc', 11: 'Vật phẩm đeo lưng',
+            12: 'Ngọc rồng', 13: 'Bùa', 14: 'Đá nâng cấp',
+            15: 'Mảnh đá vụn', 16: 'Bình nước phép', 21: '.',
+            22: 'Vệ tinh', 23: 'Thú cưỡi mới', 24: 'Thú cưỡi cũ',
+            25: 'Rada dò NR Namek', 27: 'Tạp chủng', 28: 'Cờ PK',
+            29: 'Item time', 30: 'Sao pha lê', 31: 'Bánh',
+            32: 'Giáp tập luyện', 33: 'Mảnh sưu tập', 34: 'Hồng ngọc',
+            35: 'Khác', 72: 'Cải trang Hệ', 73: 'Cải trang Pet',
+            74: 'Cải trang Khác', 75: 'Meow', 76: 'Áo',
+            77: 'Set đồ', 99: 'Đặc biệt'
+        };
+        
+        const typeColors = {
+            0: '#3498db', 1: '#e67e22', 2: '#9b59b6', 3: '#1abc9c',
+            4: '#f1c40f', 5: '#e74c3c', 6: '#27ae60', 7: '#34495e',
+            9: '#f39c12', 10: '#3498db', 11: '#16a085', 12: '#9b59b6',
+            13: '#c0392b', 14: '#7f8c8d', 15: '#95a5a6', 16: '#2980b9',
+            21: '#bdc3c7', 22: '#8e44ad', 23: '#d35400', 24: '#c0392b',
+            25: '#27ae60', 27: '#e67e22', 28: '#c0392b', 29: '#16a085',
+            30: '#8e44ad', 31: '#d35400', 32: '#2c3e50', 33: '#16a085',
+            34: '#c0392b', 35: '#7f8c8d', 72: '#ff6b9d', 73: '#c44569',
+            74: '#574b90', 75: '#f39c12', 76: '#3498db', 77: '#9b59b6',
+            99: '#e74c3c'
+        };
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return token;
+        }
+
+        // API request helper
+        async function apiRequest(endpoint, options = {}) {
+            const token = checkAuth();
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        ...options.headers
+                    }
+                });
+                return await response.json();
+            } catch (error) {
+                showToast('Không thể kết nối đến server', 'error');
+                return null;
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Format number
+        function formatNumber(num) {
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        // Format power
+        function formatPower(power) {
+            return formatNumber(power || 0);
+        }
+
+        // Global helper: handle item icon load error -> generate SVG fallback
+        window.handleItemIconError = function(img, itemId, itemName) {
+            if (!img || img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            const safeId = Number(itemId) || 0;
+            const name = (itemName && itemName !== 'undefined') ? String(itemName).substring(0, 8) : ('#' + safeId);
+            // Build a colored fallback box with ID and short name
+            const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">' +
+                        '<defs><linearGradient id="bg' + safeId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                        '<stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#2c3e50"/>' +
+                        '</linearGradient></defs>' +
+                        '<rect fill="url(#bg' + safeId + ')" width="56" height="56" rx="6"/>' +
+                        '<rect x="2" y="2" width="52" height="52" rx="4" fill="none" stroke="#7f8c8d" stroke-width="1.5"/>' +
+                        '<text x="28" y="26" font-size="9" fill="#bdc3c7" text-anchor="middle" font-weight="bold" font-family="monospace">' + safeId + '</text>' +
+                        '<text x="28" y="40" font-size="7" fill="#95a5a6" text-anchor="middle" font-family="sans-serif">' + name + '</text>' +
+                        '</svg>';
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        };
+
+        // Global helper: handle boss icon load error -> generate SVG fallback
+        window.handleBossIconError = function(img, bossName) {
+            if (!img || img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            const initial = (bossName || 'B').trim().charAt(0).toUpperCase();
+            const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">' +
+                        '<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                        '<stop offset="0%" stop-color="#9b59b6"/><stop offset="100%" stop-color="#e74c3c"/>' +
+                        '</linearGradient></defs>' +
+                        '<rect fill="url(#g)" width="60" height="60" rx="8"/>' +
+                        '<text x="30" y="38" font-size="26" fill="#fff" text-anchor="middle" font-weight="bold" font-family="sans-serif">' + initial + '</text>' +
+                        '</svg>';
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        };
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminInfo');
+            window.location.href = 'login.html';
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                if (page) {
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    loadPage(page);
+                }
+            });
+        });
+
+        // Load page
+        async function loadPage(page) {
+            currentPage = page;
+            const content = document.getElementById('pageContent');
+            const title = document.getElementById('pageTitle');
+            
+            content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            switch(page) {
+                case 'dashboard':
+                    title.innerHTML = '<i class="fas fa-home"></i> Tổng Quan';
+                    await loadDashboard();
+                    break;
+                case 'accounts':
+                    title.innerHTML = '<i class="fas fa-users"></i> Quản Lý Tài Khoản';
+                    await loadAccounts();
+                    break;
+                case 'players':
+                    title.innerHTML = '<i class="fas fa-user-shield"></i> Quản Lý Nhân Vật';
+                    await loadPlayers();
+                    break;
+                case 'items':
+                    title.innerHTML = '<i class="fas fa-gem"></i> Quản Lý Vật Phẩm';
+                    await loadItems();
+                    break;
+                case 'giftcodes':
+                    title.innerHTML = '<i class="fas fa-gift"></i> Quản Lý Giftcode';
+                    await loadGiftcodes();
+                    break;
+                case 'shop':
+                    title.innerHTML = '<i class="fas fa-store"></i> Quản Lý Cửa Hàng';
+                    await loadShop();
+                    break;
+                case 'costumes':
+                    title.innerHTML = '<i class="fas fa-mask"></i> Quản Lý Cải Trang';
+                    await loadCostumes();
+                    break;
+                case 'bosses':
+                    title.innerHTML = '<i class="fas fa-skull-crossbones"></i> Quản Lý Boss';
+                    await loadBosses();
+                    break;
+                case 'history':
+                    title.innerHTML = '<i class="fas fa-history"></i> Lịch Sử Giao Dịch';
+                    await loadHistory();
+                    break;
+                case 'settings':
+                    title.innerHTML = '<i class="fas fa-cog"></i> Cài Đặt Server';
+                    await loadSettings();
+                    break;
+            }
+        }
+
+        // ============ DASHBOARD ============
+        async function loadDashboard() {
+            const data = await apiRequest('/dashboard/stats');
+            const topPlayers = await apiRequest('/stats/top-players?limit=10');
+            
+            if (!data) return;
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-value">${formatNumber(data.stats.totalAccounts)}</div>
+                        <div class="stat-label">Tổng Tài Khoản</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon"><i class="fas fa-user"></i></div>
+                        <div class="stat-value">${formatNumber(data.stats.totalPlayers)}</div>
+                        <div class="stat-label">Tổng Nhân Vật</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-icon"><i class="fas fa-signal"></i></div>
+                        <div class="stat-value">${data.stats.onlinePlayers}</div>
+                        <div class="stat-label">Đang Online</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                        <div class="stat-value">${formatNumber(data.stats.totalRecharge)}</div>
+                        <div class="stat-label">Tổng Nạp Tiền (VNĐ)</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-trophy"></i> Top Nhân Vật Mạnh Nhất</h3>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Hạng</th>
+                                        <th>Nhân Vật</th>
+                                        <th>Tài Khoản</th>
+                                        <th>Sức Mạnh</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${(topPlayers?.players || []).map((p, i) => `
+                                        <tr>
+                                            <td><span class="badge badge-${i < 3 ? 'warning' : 'info'}">#${i + 1}</span></td>
+                                            <td>${p.name}</td>
+                                            <td>${p.username || 'N/A'}</td>
+                                            <td><strong>${formatPower(p.power)}</strong></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Thao Tác Nhanh</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions" style="grid-template-columns: 1fr;">
+                                <button class="quick-action-btn" onclick="document.querySelector('[data-page=accounts]').click()">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Thêm Tài Khoản</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="document.querySelector('[data-page=giftcodes]').click()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Tạo Giftcode</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="document.querySelector('[data-page=players]').click()">
+                                    <i class="fas fa-search"></i>
+                                    <span>Tìm Nhân Vật</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="document.querySelector('[data-page=settings]').click()">
+                                    <i class="fas fa-server"></i>
+                                    <span>Cài Đặt Server</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ ACCOUNTS ============
+        let accountsPage = 1;
+        async function loadAccounts() {
+            const data = await apiRequest(`/accounts?page=${accountsPage}&limit=20`);
+            
+            if (!data) return;
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-users"></i> Danh Sách Tài Khoản</h3>
+                        <button class="btn btn-primary btn-sm" onclick="showCreateAccountModal()">
+                            <i class="fas fa-plus"></i> Tạo Admin
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm tài khoản..." id="searchAccount" onkeyup="searchAccounts()">
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tài Khoản</th>
+                                        <th>Ngày Tạo</th>
+                                        <th>Quyền</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Tổng Nạp</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountsTable">
+                                    ${data.accounts.map(acc => `
+                                        <tr>
+                                            <td>${acc.id}</td>
+                                            <td><strong>${acc.username}</strong></td>
+                                            <td>${new Date(acc.create_time).toLocaleDateString('vi-VN')}</td>
+                                            <td>
+                                                ${acc.is_admin == 1 ? '<span class="badge badge-danger">Admin</span>' : 
+                                                  acc.role >= 0 ? '<span class="badge badge-warning">VIP ' + acc.role + '</span>' : 
+                                                  '<span class="badge badge-info">User</span>'}
+                                            </td>
+                                            <td>
+                                                ${acc.ban == 1 ? '<span class="badge badge-danger">Banned</span>' : 
+                                                  '<span class="badge badge-success">Active</span>'}
+                                            </td>
+                                            <td>${formatNumber(acc.tongnap || 0)}đ</td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="action-btn view" onclick="viewAccount(${acc.id})" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn edit" onclick="editAccount(${acc.id})" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="action-btn ${acc.ban == 1 ? 'view' : 'delete'}" 
+                                                            onclick="toggleBan(${acc.id}, ${acc.ban})" 
+                                                            title="${acc.ban == 1 ? 'Unban' : 'Ban'}">
+                                                        <i class="fas fa-${acc.ban == 1 ? 'unlock' : 'ban'}"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button ${accountsPage <= 1 ? 'disabled' : ''} onclick="changeAccountsPage(${accountsPage - 1})">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span style="padding: 8px 15px;">Trang ${accountsPage} / ${data.pagination.totalPages || 1}</span>
+                            <button ${accountsPage >= data.pagination.totalPages ? 'disabled' : ''} onclick="changeAccountsPage(${accountsPage + 1})">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function searchAccounts() {
+            const search = document.getElementById('searchAccount').value;
+            const data = await apiRequest(`/accounts?page=1&limit=20&search=${search}`);
+            if (!data) return;
+            
+            document.getElementById('accountsTable').innerHTML = data.accounts.map(acc => `
+                <tr>
+                    <td>${acc.id}</td>
+                    <td><strong>${acc.username}</strong></td>
+                    <td>${new Date(acc.create_time).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                        ${acc.is_admin == 1 ? '<span class="badge badge-danger">Admin</span>' : 
+                          acc.role >= 0 ? '<span class="badge badge-warning">VIP ' + acc.role + '</span>' : 
+                          '<span class="badge badge-info">User</span>'}
+                    </td>
+                    <td>
+                        ${acc.ban == 1 ? '<span class="badge badge-danger">Banned</span>' : 
+                          '<span class="badge badge-success">Active</span>'}
+                    </td>
+                    <td>${formatNumber(acc.tongnap || 0)}đ</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view" onclick="viewAccount(${acc.id})"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn edit" onclick="editAccount(${acc.id})"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn ${acc.ban == 1 ? 'view' : 'delete'}" onclick="toggleBan(${acc.id}, ${acc.ban})">
+                                <i class="fas fa-${acc.ban == 1 ? 'unlock' : 'ban'}"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function changeAccountsPage(page) {
+            accountsPage = page;
+            loadAccounts();
+        }
+
+        async function viewAccount(id) {
+            const data = await apiRequest(`/accounts/${id}`);
+            if (!data) return;
+
+            showModal('Thông Tin Tài Khoản', `
+                <div class="player-details">
+                    <div class="detail-section">
+                        <h4><i class="fas fa-user"></i> Thông Tin</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">ID</span>
+                            <span class="detail-value">${data.account.id}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Username</span>
+                            <span class="detail-value">${data.account.username}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value">${data.account.gmail || 'Chưa có'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Ngày Tạo</span>
+                            <span class="detail-value">${new Date(data.account.create_time).toLocaleString('vi-VN')}</span>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h4><i class="fas fa-coins"></i> Tài Chính</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Tổng Nạp</span>
+                            <span class="detail-value">${formatNumber(data.account.tongnap || 0)}đ</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Coin</span>
+                            <span class="detail-value">${formatNumber(data.account.coin || 0)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">VNĐ</span>
+                            <span class="detail-value">${formatNumber(data.account.vnd || 0)}đ</span>
+                        </div>
+                    </div>
+                </div>
+                ${data.players.length > 0 ? `
+                <h4 style="margin-top: 20px;"><i class="fas fa-users"></i> Nhân Vật (${data.players.length})</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên</th>
+                                <th>Giới Tính</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.players.map(p => `
+                                <tr>
+                                    <td>${p.id}</td>
+                                    <td>${p.name}</td>
+                                    <td>${p.gender == 0 ? 'Nam' : p.gender == 1 ? 'Nữ' : 'Khác'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="viewPlayer(${p.id}); closeModal();">
+                                            <i class="fas fa-eye"></i> Xem
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : '<p style="color: var(--light-gray); margin-top: 20px;">Không có nhân vật nào</p>'}
+            `);
+        }
+
+        async function editAccount(id) {
+            const data = await apiRequest(`/accounts/${id}`);
+            if (!data) return;
+
+            showModal('Chỉnh Sửa Tài Khoản', `
+                <form id="editAccountForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tổng Nạp (VNĐ)</label>
+                            <input type="number" class="form-control" id="editTongnap" value="${data.account.tongnap || 0}">
+                        </div>
+                        <div class="form-group">
+                            <label>Coin</label>
+                            <input type="number" class="form-control" id="editCoin" value="${data.account.coin || 0}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>VIP Level</label>
+                            <input type="number" class="form-control" id="editRole" value="${data.account.role || -1}" min="-1">
+                        </div>
+                        <div class="form-group">
+                            <label>Quyền Admin</label>
+                            <select class="form-control" id="editIsAdmin">
+                                <option value="0" ${data.account.is_admin == 0 ? 'selected' : ''}>Không</option>
+                                <option value="1" ${data.account.is_admin == 1 ? 'selected' : ''}>Có</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            `, [
+                { text: 'Hủy', class: 'btn-secondary', action: 'closeModal()' },
+                { text: 'Lưu', class: 'btn-primary', action: `saveAccount(${id})` }
+            ]);
+        }
+
+        async function saveAccount(id) {
+            const data = {
+                tongnap: parseInt(document.getElementById('editTongnap').value),
+                coin: parseInt(document.getElementById('editCoin').value),
+                role: parseInt(document.getElementById('editRole').value),
+                is_admin: parseInt(document.getElementById('editIsAdmin').value)
+            };
+
+            const result = await apiRequest(`/accounts/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            if (result?.success) {
+                showToast('Cập nhật thành công!', 'success');
+                closeModal();
+                loadAccounts();
+            }
+        }
+
+        async function toggleBan(id, currentBan) {
+            const isUnban = currentBan == 1;
+            const confirmed = await showConfirmDialog({
+                title: isUnban ? 'Mở Khóa Tài Khoản' : 'Khóa Tài Khoản',
+                message: `Bạn có chắc muốn ${isUnban ? 'mở khóa (unban)' : 'khóa (ban)'} tài khoản này?`,
+                confirmText: isUnban ? 'Mở Khóa' : 'Khóa',
+                cancelText: 'Hủy',
+                type: isUnban ? 'success' : 'danger',
+                icon: isUnban ? 'fa-unlock' : 'fa-ban'
+            });
+            if (!confirmed) return;
+
+            const result = await apiRequest(`/accounts/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ ban: isUnban ? 0 : 1 })
+            });
+
+            if (result?.success) {
+                showToast(isUnban ? 'Đã mở khóa tài khoản!' : 'Đã khóa tài khoản!', 'success');
+                loadAccounts();
+            }
+        }
+
+        // ============ PLAYERS ============
+        let playersPage = 1;
+        async function loadPlayers() {
+            const data = await apiRequest(`/players?page=${playersPage}&limit=20`);
+            
+            if (!data) return;
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-shield"></i> Danh Sách Nhân Vật</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm nhân vật..." id="searchPlayer" onkeyup="searchPlayers()">
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên Nhân Vật</th>
+                                        <th>Tài Khoản</th>
+                                        <th>Giới Tính</th>
+                                        <th>Sức Mạnh</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="playersTable">
+                                    ${data.players.map(p => `
+                                        <tr>
+                                            <td>${p.id}</td>
+                                            <td><strong>${p.name}</strong></td>
+                                            <td>${p.username || 'N/A'}</td>
+                                            <td>${p.gender == 0 ? 'Nam' : p.gender == 1 ? 'Nữ' : 'Khác'}</td>
+                                            <td><strong style="color: var(--primary);">${formatPower(p.power)}</strong></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="action-btn view" onclick="viewPlayer(${p.id})" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn edit" onclick="editPlayer(${p.id})" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="action-btn delete" onclick="giveItemToPlayer(${p.id})" title="Thêm vật phẩm">
+                                                        <i class="fas fa-gem"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button ${playersPage <= 1 ? 'disabled' : ''} onclick="changePlayersPage(${playersPage - 1})">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span style="padding: 8px 15px;">Trang ${playersPage} / ${data.pagination.totalPages || 1}</span>
+                            <button ${playersPage >= data.pagination.totalPages ? 'disabled' : ''} onclick="changePlayersPage(${playersPage + 1})">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function searchPlayers() {
+            const search = document.getElementById('searchPlayer').value;
+            const data = await apiRequest(`/players?page=1&limit=20&search=${search}`);
+            if (!data) return;
+            
+            document.getElementById('playersTable').innerHTML = data.players.map(p => `
+                <tr>
+                    <td>${p.id}</td>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.username || 'N/A'}</td>
+                    <td>${p.gender == 0 ? 'Nam' : p.gender == 1 ? 'Nữ' : 'Khác'}</td>
+                    <td><strong style="color: var(--primary);">${formatPower(p.power)}</strong></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view" onclick="viewPlayer(${p.id})"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn edit" onclick="editPlayer(${p.id})"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete" onclick="giveItemToPlayer(${p.id})"><i class="fas fa-gem"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function changePlayersPage(page) {
+            playersPage = page;
+            loadPlayers();
+        }
+
+        async function viewPlayer(id) {
+            const data = await apiRequest(`/players/${id}`);
+            if (!data) return;
+
+            // Ensure items cache is loaded for icon/name lookup
+            if (!itemsCache || itemsCache.length === 0) {
+                try {
+                    const tpl = await apiRequest('/items/templates');
+                    itemsCache = tpl?.items || [];
+                } catch (e) {
+                    console.warn('Could not preload items cache:', e);
+                }
+            }
+
+            const p = data.player;
+            const point = p.point || [];
+            const inv = p.inventory || [];
+
+            // Parse items from player's bag (items_bag)
+            let bagItems = [];
+            try {
+                if (p.items_bag) {
+                    const parsed = typeof p.items_bag === 'string' ? JSON.parse(p.items_bag) : p.items_bag;
+                    bagItems = parsed.filter(item => item && item[0] !== -1 && item[0] !== undefined);
+                }
+            } catch (e) {
+                console.log('Parse bag error:', e);
+            }
+
+            showModal(`Nhân Vật: ${p.name}`, `
+                <div class="player-details">
+                    <div class="detail-section">
+                        <h4><i class="fas fa-user"></i> Thông Tin</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">ID</span>
+                            <span class="detail-value">${p.id}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tên</span>
+                            <span class="detail-value">${p.name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Giới Tính</span>
+                            <span class="detail-value">${p.gender == 0 ? 'Nam' : p.gender == 1 ? 'Nữ' : 'Khác'}</span>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h4><i class="fas fa-chart-line"></i> Chỉ Số</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Level</span>
+                            <span class="detail-value">${point[0] || 1}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Sức Mạnh</span>
+                            <span class="detail-value">${formatPower(point[1])}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tiềm Năng</span>
+                            <span class="detail-value">${formatPower(point[2])}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">HP</span>
+                            <span class="detail-value">${formatNumber(point[4])}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">KI</span>
+                            <span class="detail-value">${formatNumber(point[5])}</span>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h4><i class="fas fa-coins"></i> Tài Khoản</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Vàng</span>
+                            <span class="detail-value">${formatNumber(inv[0] || 0)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Ngọc Xanh</span>
+                            <span class="detail-value">${formatNumber(inv[1] || 0)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Hồng Ngọc</span>
+                            <span class="detail-value">${formatNumber(inv[2] || 0)}</span>
+                        </div>
+                        ${data.account ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Tổng Nạp</span>
+                            <span class="detail-value">${formatNumber(data.account.tongnap)}đ</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ${bagItems.length > 0 ? `
+                <div style="margin-top: 20px;">
+                    <h4><i class="fas fa-briefcase"></i> Hành Trang (${bagItems.length} vật phẩm)</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 10px;">
+                        ${bagItems.slice(0, 30).map(item => {
+                            const rawId = item[0];
+                            const quantity = item[1] || 1;
+                            const itemId = Number(rawId) || 0;
+                            // Look up item info from cache for proper name and icon
+                            const cached = (itemsCache || []).find(it => Number(it.id) === itemId);
+                            const itemName = (cached && cached.name) ? cached.name : ('Vật phẩm #' + itemId);
+                            const typeId = (cached && cached.type !== undefined) ? cached.type : 0;
+                            const rarityColor = (typeof typeColors !== 'undefined' && typeColors[typeId]) || '#95a5a6';
+                            // Use cached iconUrl if available, else construct from id
+                            const iconUrl = (cached && cached.iconUrl) ? cached.iconUrl : ('/icons/x1/' + itemId + '.png');
+                            const safeName = String(itemName).replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                            const isEquipment = (typeof typeNames !== 'undefined') && (typeId === 0 || typeId === 1 || typeId === 2 || typeId === 3 || typeId === 4);
+                            return `
+                                <div class="item-icon-cell" style="position: relative; aspect-ratio: 1; min-height: 70px; background: linear-gradient(135deg, ${rarityColor}22 0%, ${rarityColor}11 100%); border: 1px solid ${rarityColor}66; border-radius: 6px; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;" title="${String(itemName).replace(/"/g, '&quot;')} (ID: ${itemId}) x${quantity}">
+                                    <img src="${iconUrl}"
+                                         alt="${String(itemName).replace(/"/g, '&quot;')}"
+                                         data-fallback-id="${itemId}"
+                                         data-fallback-name="${String(itemName).replace(/"/g, '&quot;')}"
+                                         onerror="window.handleItemIconError && window.handleItemIconError(this, ${itemId}, '${safeName}')"
+                                         style="width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated; flex-shrink: 0;">
+                                    <div style="font-size: 9px; line-height: 1.1; color: #ddd; text-align: center; max-width: 100%; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">
+                                        ${safeName}
+                                    </div>
+                                    ${quantity > 1 ? `<span style="position: absolute; bottom: 1px; right: 2px; background: rgba(0,0,0,0.85); color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: bold; line-height: 1;">${quantity > 999 ? '999+' : quantity}</span>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                        ${bagItems.length > 30 ? `<div style="grid-column: 1/-1; color: var(--light-gray); padding: 10px; text-align: center; font-style: italic;">... và ${bagItems.length - 30} vật phẩm khác</div>` : ''}
+                    </div>
+                </div>
+                ` : ''}
+            `);
+        }
+
+        async function editPlayer(id) {
+            const data = await apiRequest(`/players/${id}`);
+            if (!data) return;
+
+            const p = data.player;
+            const point = p.point || [];
+
+            showModal(`Chỉnh Sửa: ${p.name}`, `
+                <form id="editPlayerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Sức Mạnh</label>
+                            <input type="number" class="form-control" id="editPower" value="${point[1] || 0}">
+                        </div>
+                        <div class="form-group">
+                            <label>Tiềm Năng</label>
+                            <input type="number" class="form-control" id="editTienNang" value="${point[2] || 0}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vàng</label>
+                            <input type="number" class="form-control" id="editGold" value="${p.inventory?.[0] || 0}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ngọc Xanh</label>
+                            <input type="number" class="form-control" id="editGem" value="${p.inventory?.[1] || 0}">
+                        </div>
+                    </div>
+                </form>
+            `, [
+                { text: 'Hủy', class: 'btn-secondary', action: 'closeModal()' },
+                { text: 'Lưu', class: 'btn-primary', action: `savePlayer(${id})` }
+            ]);
+        }
+
+        async function savePlayer(id) {
+            const data = {
+                power: parseInt(document.getElementById('editPower').value),
+                tienNang: parseInt(document.getElementById('editTienNang').value)
+            };
+
+            const result = await apiRequest(`/players/${id}/stats`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            // Also update currency
+            await apiRequest(`/players/${id}/currency`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    gold: parseInt(document.getElementById('editGold').value),
+                    gem: parseInt(document.getElementById('editGem').value)
+                })
+            });
+
+            if (result?.success) {
+                showToast('Cập nhật thành công!', 'success');
+                closeModal();
+            }
+        }
+
+        async function giveItemToPlayer(id) {
+            showModal('Thêm Vật Phẩm', `
+                <form id="giveItemForm">
+                    <div class="form-group">
+                        <label>ID Vật Phẩm</label>
+                        <input type="number" class="form-control" id="itemId" placeholder="VD: 457 (Thỏi vàng)">
+                    </div>
+                    <div class="form-group">
+                        <label>Số Lượng</label>
+                        <input type="number" class="form-control" id="itemQuantity" value="1" min="1">
+                    </div>
+                    <p style="color: var(--light-gray); font-size: 0.85rem;">
+                        <i class="fas fa-info-circle"></i> Vật phẩm sẽ được thêm vào hành trang của nhân vật
+                    </p>
+                </form>
+            `, [
+                { text: 'Hủy', class: 'btn-secondary', action: 'closeModal()' },
+                { text: 'Thêm Vật Phẩm', class: 'btn-primary', action: `submitGiveItem(${id})` }
+            ]);
+        }
+
+        async function submitGiveItem(playerId) {
+            const itemId = parseInt(document.getElementById('itemId').value);
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+
+            if (!itemId) {
+                showToast('Vui lòng nhập ID vật phẩm', 'error');
+                return;
+            }
+
+            const result = await apiRequest(`/players/${playerId}/items`, {
+                method: 'POST',
+                body: JSON.stringify({ itemId, quantity })
+            });
+
+            if (result?.success) {
+                showToast('Thêm vật phẩm thành công!', 'success');
+                closeModal();
+            }
+        }
+
+        // ============ GIFTCODES ============
+        async function loadGiftcodes() {
+            const data = await apiRequest('/giftcodes');
+            
+            if (!data) return;
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-gift"></i> Quản Lý Giftcode</h3>
+                        <button class="btn btn-primary btn-sm" onclick="showCreateGiftcodeModal()">
+                            <i class="fas fa-plus"></i> Tạo Giftcode
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Mã</th>
+                                        <th>Loại</th>
+                                        <th>Giới Hạn</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.giftcodes.map(gc => `
+                                        <tr>
+                                            <td>${gc.id}</td>
+                                            <td><strong style="font-family: monospace; color: var(--primary);">${gc.code}</strong></td>
+                                            <td>${gc.type == 1 ? 'Vật phẩm' : 'Khác'}</td>
+                                            <td>${gc.limit || '∞'}</td>
+                                            <td>
+                                                ${gc.active == 1 ? '<span class="badge badge-success">Active</span>' : 
+                                                  '<span class="badge badge-danger">Disabled</span>'}
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="action-btn edit" onclick="toggleGiftcode(${gc.id}, ${gc.active})">
+                                                        <i class="fas fa-${gc.active == 1 ? 'toggle-on' : 'toggle-off'}"></i>
+                                                    </button>
+                                                    <button class="action-btn delete" onclick="deleteGiftcode(${gc.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Giftcode item picker storage
+        let giftcodeSelectedItems = []; // [{id, name, iconUrl, quantity}]
+
+        async function showCreateGiftcodeModal() {
+            // Ensure items cache is loaded
+            if (!itemsCache) {
+                showToast('Đang tải danh sách vật phẩm...', 'info');
+                await loadItems();
+            }
+
+            // Reset state only when entering fresh from list (not when re-rendering)
+            // closeItemPicker sets a flag to keep state
+            if (!window._preserveGiftcodeSelection) {
+                giftcodeSelectedItems = [];
+            }
+            window._preserveGiftcodeSelection = false;
+
+            renderCreateGiftcodeModal();
+        }
+
+        function renderCreateGiftcodeModal() {
+            showModal('Tạo Giftcode Mới', `
+                <form id="createGiftcodeForm">
+                    <div class="form-group">
+                        <label><strong>Mã Giftcode</strong></label>
+                        <input type="text" class="form-control" id="gcCode" placeholder="VD: TANTHE2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Giới Hạn Sử Dụng</strong></label>
+                        <input type="number" class="form-control" id="gcLimit" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Vật Phẩm Trong Giftcode</strong></label>
+                        <button type="button" class="btn btn-primary" onclick="openGiftcodeItemPicker()" style="width: 100%;">
+                            <i class="fas fa-plus-circle"></i> Chọn Vật Phẩm
+                        </button>
+                        <div id="gcSelectedItemsPreview" style="margin-top: 10px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Option Vật Phẩm (JSON - nâng cao)</strong></label>
+                        <textarea class="form-control" id="gcOptions" rows="2" placeholder='[{"id": 30, "param": 1}]'>[]</textarea>
+                        <small class="text-muted">Tùy chọn cho mỗi vật phẩm (chỉ số bổ sung)</small>
+                    </div>
+                </form>
+            `, [
+                { text: 'Hủy', class: 'btn-secondary', action: 'closeModal()' },
+                { text: 'Tạo Giftcode', class: 'btn-primary', action: 'submitCreateGiftcode()' }
+            ]);
+            renderGiftcodePreview();
+        }
+
+        async function openGiftcodeItemPicker() {
+            // Open a picker modal with item cache
+            if (!itemsCache) {
+                // Try loading
+                showToast('Đang tải...', 'info');
+                const data = await apiRequest('/items/templates');
+                itemsCache = data?.items || [];
+            }
+            
+            const totalItems = itemsCache.length;
+            const typeOptsHtml = Object.keys(typeNames).map(t => {
+                const count = itemsCache.filter(i => i.type == t).length;
+                if (count === 0) return '';
+                return `<option value="${t}">${typeNames[t]} (${count})</option>`;
+            }).join('');
+            
+            const modalId = 'itemPickerModal';
+            showModal('Chọn Vật Phẩm Cho Giftcode', `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px;">
+                        <input type="text" class="form-control" id="pickerSearch" onkeyup="renderItemPicker()" placeholder="Tìm theo tên/ID...">
+                        <select class="form-control" id="pickerTypeFilter" onchange="renderItemPicker()">
+                            <option value="">📦 Tất cả</option>
+                            ${typeOptsHtml}
+                        </select>
+                        <button class="btn btn-secondary" onclick="document.getElementById('pickerSearch').value=''; document.getElementById('pickerTypeFilter').value=''; renderItemPicker();">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <small style="color: var(--light-gray); margin-top: 8px; display: block;">
+                        <i class="fas fa-info-circle"></i> Có ${totalItems} vật phẩm - Click vào vật phẩm để thêm vào danh sách
+                    </small>
+                </div>
+                <div id="pickerGrid" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 5px;"></div>
+            `, [
+                { text: 'Xong', class: 'btn-primary', action: 'closeItemPicker()' }
+            ]);
+            
+            // Render initial list
+            setTimeout(() => renderItemPicker(), 50);
+        }
+        
+        function renderItemPicker() {
+            const search = (document.getElementById('pickerSearch')?.value || '').toLowerCase().trim();
+            const typeFilter = document.getElementById('pickerTypeFilter')?.value || '';
+            
+            const filtered = itemsCache.filter(item => {
+                const name = (item.name || '').toLowerCase();
+                const matchSearch = !search || name.includes(search) || String(item.id).includes(search);
+                const matchType = !typeFilter || String(item.type) === typeFilter;
+                return matchSearch && matchType;
+            }).slice(0, 200); // Limit to 200 for perf
+            
+            const grid = document.getElementById('pickerGrid');
+            if (!grid) return;
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: var(--light-gray);"><i class="fas fa-search"></i> Không tìm thấy vật phẩm</div>';
+                return;
+            }
+            
+            const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><rect fill="#eee" width="60" height="60"/><text x="30" y="35" font-size="11" fill="#999" text-anchor="middle">ID</text></svg>`;
+            const fallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(fallbackSvg);
+            
+            grid.innerHTML = filtered.map(item => {
+                const iconUrl = item.iconUrl || '/icons/x1/' + item.icon_id + '.png';
+                const sel = giftcodeSelectedItems.find(s => s.id === item.id);
+                const selectedStyle = sel ? 'background: rgba(46, 204, 113, 0.15); border-color: var(--success); box-shadow: 0 0 0 2px var(--success);' : '';
+                return `
+                    <div class="picker-item-card" data-id="${item.id}" onclick="toggleGiftcodeItemSelection(${item.id})" 
+                         style="background: white; border: 2px solid #e0e6ed; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; ${selectedStyle}">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="${iconUrl}" onerror="this.src='${fallbackUrl}'" style="width: 50px; height: 50px; object-fit: contain; flex-shrink: 0;">
+                            <div style="min-width: 0; flex: 1;">
+                                <div style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || 'ID ' + item.id}</div>
+                                <small style="color: var(--light-gray);">ID: ${item.id}</small><br>
+                                <small style="background: ${typeColors[item.type] || '#95a5a6'}; color: white; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem;">${typeNames[item.type] || 'L' + item.type}</small>
+                                ${sel ? `<br><small style="color: var(--success); font-weight: bold;">✓ SL: ${sel.quantity}</small>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function toggleGiftcodeItemSelection(itemId) {
+            const item = itemsCache.find(i => i.id === itemId);
+            if (!item) return;
+
+            const existIdx = giftcodeSelectedItems.findIndex(s => s.id === itemId);
+
+            if (existIdx >= 0) {
+                // Already selected -> toggle off
+                giftcodeSelectedItems.splice(existIdx, 1);
+                renderItemPicker();
+                return;
+            }
+
+            // Show prompt for quantity
+            const qty = await showPromptDialog({
+                title: 'Nhập Số Lượng',
+                message: `Vật phẩm: <strong>${item.name}</strong>\nID: <code>${item.id}</code>`,
+                label: 'Số lượng muốn thêm:',
+                defaultValue: '1',
+                inputType: 'number',
+                min: 1,
+                max: 999,
+                confirmText: '<i class="fas fa-check"></i> Thêm',
+                placeholder: 'Nhập số lượng...'
+            });
+
+            // After prompt closes, re-open the picker so user can keep selecting
+            if (qty === null || qty === undefined) {
+                openGiftcodeItemPicker();
+                return;
+            }
+            const numQty = parseInt(qty);
+            if (isNaN(numQty) || numQty < 1) {
+                showToast('Số lượng không hợp lệ', 'error');
+                openGiftcodeItemPicker();
+                return;
+            }
+            giftcodeSelectedItems.push({
+                id: item.id,
+                name: item.name,
+                iconUrl: item.iconUrl,
+                quantity: numQty
+            });
+
+            // Re-open picker (prompt closed the modal)
+            openGiftcodeItemPicker();
+        }
+        
+        function renderGiftcodePreview() {
+            const preview = document.getElementById('gcSelectedItemsPreview');
+            if (!preview) return;
+            
+            if (giftcodeSelectedItems.length === 0) {
+                preview.innerHTML = '<div style="padding: 10px; background: #f8f9fa; border-radius: 6px; color: var(--light-gray); text-align: center; font-size: 0.9rem;">Chưa chọn vật phẩm nào</div>';
+                return;
+            }
+            
+            const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect fill="#eee" width="32" height="32"/></svg>`;
+            const fallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(fallbackSvg);
+            
+            preview.innerHTML = `
+                <div style="background: #f0f9f4; border: 1px solid var(--success); border-radius: 8px; padding: 10px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: var(--success);">
+                        <i class="fas fa-check-circle"></i> Đã chọn ${giftcodeSelectedItems.length} vật phẩm:
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;">
+                        ${giftcodeSelectedItems.map(item => `
+                            <div style="background: white; padding: 6px; border-radius: 6px; display: flex; align-items: center; gap: 6px;">
+                                <img src="${item.iconUrl || '/icons/x1/' + item.id + '.png'}" onerror="this.src='${fallbackUrl}'" style="width: 32px; height: 32px; object-fit: contain;">
+                                <div style="min-width: 0; flex: 1;">
+                                    <div style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
+                                    <small style="color: var(--primary);">x${item.quantity}</small>
+                                </div>
+                                <button type="button" onclick="removeGiftcodeItem(${item.id})" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 4px;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function removeGiftcodeItem(itemId) {
+            giftcodeSelectedItems = giftcodeSelectedItems.filter(s => s.id !== itemId);
+            renderItemPicker();
+            renderGiftcodePreview();
+        }
+        
+        function closeItemPicker() {
+            closeModal();
+            // Re-show the giftcode modal with selection preserved
+            window._preserveGiftcodeSelection = true;
+            renderCreateGiftcodeModal();
+        }
+
+        async function submitCreateGiftcode() {
+            const code = document.getElementById('gcCode').value;
+            const limit = parseInt(document.getElementById('gcLimit').value);
+            
+            if (giftcodeSelectedItems.length === 0) {
+                showToast('Vui lòng chọn ít nhất 1 vật phẩm', 'error');
+                return;
+            }
+            
+            // Convert selected items to expected format
+            const items = giftcodeSelectedItems.map(s => ({
+                id: s.id,
+                quantity: s.quantity
+            }));
+            
+            let options = [];
+            try {
+                options = JSON.parse(document.getElementById('gcOptions').value || '[]');
+            } catch (e) {
+                showToast('JSON options không hợp lệ!', 'error');
+                return;
+            }
+
+            const result = await apiRequest('/giftcodes', {
+                method: 'POST',
+                body: JSON.stringify({ code, limit, items, options })
+            });
+
+            if (result?.success) {
+                showToast('Tạo giftcode thành công!', 'success');
+                closeModal();
+                loadGiftcodes();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không tạo được'), 'error');
+            }
+        }
+
+        async function toggleGiftcode(id, currentActive) {
+            const result = await apiRequest(`/giftcodes/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ active: currentActive == 1 ? 0 : 1 })
+            });
+
+            if (result?.success) {
+                showToast('Cập nhật thành công!', 'success');
+                loadGiftcodes();
+            }
+        }
+
+        async function deleteGiftcode(id) {
+            const confirmed = await showConfirmDialog({
+                title: 'Xóa Giftcode',
+                message: `Bạn có chắc muốn xóa giftcode <strong>#${id}</strong>?\n\nHành động này không thể hoàn tác!`,
+                confirmText: '<i class="fas fa-trash"></i> Xóa',
+                type: 'danger',
+                icon: 'fa-trash-alt'
+            });
+            if (!confirmed) return;
+
+            const result = await apiRequest(`/giftcodes/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (result?.success) {
+                showToast('Xóa giftcode thành công!', 'success');
+                loadGiftcodes();
+            }
+        }
+
+        // ============ ITEMS ============
+        async function loadItems() {
+            const templates = await apiRequest('/items/templates');
+            console.log('API Response:', templates);
+            
+            // Cache items for global access (used by giftcode, costumes, etc.)
+            itemsCache = templates?.items || [];
+            
+            // Count items by type for badges
+            const itemsByType = {};
+            itemsCache.forEach(item => {
+                const type = item.type || 0;
+                if (!itemsByType[type]) itemsByType[type] = 0;
+                itemsByType[type]++;
+            });
+            
+            // Generate SVG placeholder HTML helper
+            function getItemIconHtml(item) {
+                const iconUrl = item.iconUrl || '/icons/x1/' + item.icon_id + '.png';
+                const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect fill="#eee" width="40" height="40"/><text x="20" y="24" font-size="10" fill="#999" text-anchor="middle">${item.id}</text></svg>`;
+                const fallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(fallbackSvg);
+                return `<img src="${iconUrl}" alt="${item.name || 'Item'}" onerror="this.src='${fallbackUrl}'" style="width: 40px; height: 40px; object-fit: contain;">`;
+            }
+            
+            // Build type options for filter
+            const typeOptions = Object.keys(typeNames).map(t => {
+                const count = itemsByType[t] || 0;
+                return `<option value="${t}">${typeNames[t]} (${count})</option>`;
+            }).join('');
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-gem"></i> Danh Mục Vật Phẩm</h3>
+                        <span style="color: var(--light-gray);" id="itemCount">${itemsCache.length} vật phẩm</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm theo tên hoặc ID..." id="searchItem" onkeyup="filterItems()">
+                            </div>
+                            <div class="search-box" style="max-width: 250px;">
+                                <i class="fas fa-filter"></i>
+                                <select id="filterType" onchange="filterItems()" style="background: transparent; border: none; color: var(--dark); flex: 1; padding: 0 10px; outline: none;">
+                                    <option value="">📦 Tất cả danh mục</option>
+                                    ${typeOptions}
+                                </select>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="resetItemFilter()">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Icon</th>
+                                        <th style="width: 80px;">ID</th>
+                                        <th>Tên Vật Phẩm</th>
+                                        <th style="width: 140px;">Loại</th>
+                                        <th>Mô Tả</th>
+                                        <th style="width: 100px;">Giá Vàng</th>
+                                        <th style="width: 100px;">Giá Ngọc</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsTable">
+                                    ${itemsCache.map(item => `
+                                        <tr class="item-row" data-name="${(item.name || '').toLowerCase()}" data-id="${item.id}" data-type="${item.type || 0}" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}' onclick="showItemDetail(this)">
+                                            <td>
+                                                <div class="item-icon-cell">
+                                                    ${getItemIconHtml(item)}
+                                                </div>
+                                            </td>
+                                            <td><code style="color: var(--primary);">${item.id}</code></td>
+                                            <td><strong>${item.name || 'Unknown'}</strong></td>
+                                            <td>
+                                                <span class="badge" style="background: ${typeColors[item.type] || '#95a5a6'}; color: white;">
+                                                    ${typeNames[item.type] || 'Loại ' + item.type}
+                                                </span>
+                                            </td>
+                                            <td style="font-size: 0.85rem; color: var(--light-gray);">${item.description || '-'}</td>
+                                            <td style="color: var(--warning);">${item.gold > 0 ? formatNumber(item.gold) : '-'}</td>
+                                            <td style="color: var(--info);">${item.gem > 0 ? formatNumber(item.gem) : '-'}</td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="7" style="text-align: center;">Không có dữ liệu vật phẩm</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function filterItems() {
+            const search = (document.getElementById('searchItem')?.value || '').toLowerCase().trim();
+            const filterType = document.getElementById('filterType')?.value || '';
+            const rows = document.querySelectorAll('.item-row');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const name = row.dataset.name || '';
+                const id = row.dataset.id || '';
+                const type = row.dataset.type || '0';
+                
+                const matchSearch = !search || name.includes(search) || id.includes(search);
+                const matchType = !filterType || type === filterType;
+                
+                if (matchSearch && matchType) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update count display
+            const countEl = document.getElementById('itemCount');
+            if (countEl) {
+                if (search || filterType) {
+                    countEl.innerHTML = `Hiển thị <strong style="color: var(--primary);">${visibleCount}</strong> / ${itemsCache.length} vật phẩm`;
+                } else {
+                    countEl.innerHTML = `${itemsCache.length} vật phẩm`;
+                }
+            }
+        }
+        
+        function resetItemFilter() {
+            document.getElementById('searchItem').value = '';
+            document.getElementById('filterType').value = '';
+            filterItems();
+        }
+        
+        function selectItem(id) {
+            showToast(`Đã chọn vật phẩm ID: ${id}`, 'info');
+        }
+        
+        // Show item detail modal
+        function showItemDetail(row) {
+            try {
+                const item = JSON.parse(row.dataset.item);
+                
+                // Gender names
+                const genderNames = { 0: 'Nam', 1: 'Nữ', 2: 'Nam', 3: 'Tất cả' };
+                
+                // Generate large icon HTML with fallback
+                const largeIconUrl = item.iconUrl || '/icons/x1/' + item.icon_id + '.png';
+                const largeFallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect fill="#eee" width="120" height="120"/><text x="60" y="65" font-size="24" fill="#999" text-anchor="middle">${item.id}</text></svg>`;
+                const largeFallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(largeFallbackSvg);
+                
+                showModal(`Chi Tiết Vật Phẩm: ${item.name || 'ID ' + item.id}`, `
+                    <div class="item-detail-grid">
+                        <div>
+                            <div class="item-icon-large">
+                                <img src="${largeIconUrl}" 
+                                     alt="${item.name || 'Item'}"
+                                     onerror="this.src='${largeFallbackUrl}'">
+                            </div>
+                            <div style="text-align: center; margin-top: 15px;">
+                                <strong style="color: var(--primary);">ID: ${item.id}</strong><br>
+                                <span style="color: var(--light-gray);">Icon ID: ${item.icon_id}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="margin-bottom: 15px;">
+                                <h3 style="margin: 0 0 5px 0;">${item.name || 'Không có tên'}</h3>
+                                <p style="margin: 0; color: var(--light-gray);">${item.description || 'Không có mô tả'}</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Loại</span>
+                                    <span class="detail-value">${typeNames[item.type] || 'Loại ' + item.type}</span>
+                                </div>
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Giới tính</span>
+                                    <span class="detail-value">${genderNames[item.gender] || 'Tất cả'}</span>
+                                </div>
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Giá vàng</span>
+                                    <span class="detail-value" style="color: var(--warning);">${item.gold > 0 ? formatNumber(item.gold) : 'Không bán'}</span>
+                                </div>
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Giá ngọc</span>
+                                    <span class="detail-value" style="color: var(--info);">${item.gem > 0 ? formatNumber(item.gem) : 'Không bán'}</span>
+                                </div>
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Yêu cầu sức mạnh</span>
+                                    <span class="detail-value">${item.power_require > 0 ? formatPower(item.power_require) : '0'}</span>
+                                </div>
+                                <div class="detail-item-full">
+                                    <span class="detail-label">Có thể nâng cấp</span>
+                                    <span class="detail-value">${item.is_up_to_up == 1 ? 'Có' : 'Không'}</span>
+                                </div>
+                            </div>
+                            
+                            ${item.part > 0 ? `
+                            <div style="margin-top: 15px; padding: 10px; background: rgba(52, 152, 219, 0.1); border-radius: 8px;">
+                                <strong style="color: var(--info);"><i class="fas fa-info-circle"></i> Thông tin trang bị</strong>
+                                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Part ID: ${item.part}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `);
+            } catch (e) {
+                showToast('Lỗi hiển thị chi tiết vật phẩm', 'error');
+                console.error(e);
+            }
+        }
+
+        // ============ SHOP ============
+        async function loadShop() {
+            const data = await apiRequest('/shop/items');
+            
+            if (!data?.success) {
+                document.getElementById('pageContent').innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-store"></i> Quản Lý Cửa Hàng</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-state">
+                                <i class="fas fa-store"></i>
+                                <h3>Cửa Hàng</h3>
+                                <p>Không thể tải dữ liệu shop</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const items = data.items || [];
+            const tabs = await apiRequest('/shop/tabs');
+            const tabList = tabs?.tabs || [];
+            
+            function getIconHtml(iconId) {
+                const iconUrl = '/icons/x1/' + (iconId || 0) + '.png';
+                const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect fill="#eee" width="40" height="40"/></svg>`;
+                const fallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(fallbackSvg);
+                return `<img src="${iconUrl}" onerror="this.src='${fallbackUrl}'" style="width: 40px; height: 40px; object-fit: contain;">`;
+            }
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-store"></i> Quản Lý Cửa Hàng</h3>
+                        <span style="color: var(--light-gray);">${items.length} vật phẩm trong shop</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm theo tên hoặc ID..." id="searchShopItem" onkeyup="filterShopItems()">
+                            </div>
+                            <div class="search-box" style="max-width: 250px;">
+                                <i class="fas fa-filter"></i>
+                                <select id="filterShopTab" onchange="filterShopItems()" style="background: transparent; border: none; color: var(--dark); flex: 1; padding: 0 10px; outline: none;">
+                                    <option value="">📑 Tất cả tab</option>
+                                    ${tabList.map(t => `<option value="${t.id}">${t.NAME} (Shop ${t.shop_id})</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Icon</th>
+                                        <th style="width: 60px;">Shop ID</th>
+                                        <th>Tên vật phẩm</th>
+                                        <th style="width: 100px;">Giá</th>
+                                        <th style="width: 100px;">Loại tiền</th>
+                                        <th>Mô tả chỉ số</th>
+                                        <th style="width: 80px;">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shopItemsTable">
+                                    ${items.map(item => {
+                                        const tabName = tabList.find(t => t.id === item.tab_id)?.NAME || 'Tab ' + item.tab_id;
+                                        const optsText = (item.options || []).map(o => `${o.NAME || 'Option ' + o.option_id} +${o.param}`).join(', ') || 'Không có';
+                                        return `
+                                            <tr class="shop-row" data-name="${(item.name || '').toLowerCase()}" data-id="${item.id}" data-tab="${item.tab_id}">
+                                                <td>${getIconHtml(item.icon_id)}</td>
+                                                <td><code style="color: var(--primary);">#${item.id}</code></td>
+                                                <td><strong>${item.name || 'ID ' + item.temp_id}</strong><br><small style="color: var(--light-gray);">${tabName}</small></td>
+                                                <td style="color: var(--warning);">${formatNumber(item.cost)}</td>
+                                                <td><span class="badge" style="background: #95a5a6;">${item.type_sell === 1 ? 'Ngọc' : item.type_sell === 5 ? 'Vàng' : 'Loại ' + item.type_sell}</span></td>
+                                                <td style="font-size: 0.8rem; max-width: 300px; color: var(--light-gray);">${optsText}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteShopItem(${item.id})"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('') || '<tr><td colspan="7" style="text-align: center;">Chưa có vật phẩm nào trong shop</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function filterShopItems() {
+            const search = (document.getElementById('searchShopItem')?.value || '').toLowerCase().trim();
+            const tab = document.getElementById('filterShopTab')?.value || '';
+            const rows = document.querySelectorAll('.shop-row');
+            rows.forEach(row => {
+                const name = (row.dataset.name || '').toLowerCase();
+                const id = row.dataset.id || '';
+                const matchSearch = !search || name.includes(search) || id.includes(search);
+                const matchTab = !tab || row.dataset.tab === tab;
+                row.style.display = matchSearch && matchTab ? '' : 'none';
+            });
+        }
+        
+        async function deleteShopItem(id) {
+            const confirmed = await showConfirmDialog({
+                title: 'Xóa Khỏi Shop',
+                message: `Bạn có chắc muốn xóa vật phẩm <strong>#${id}</strong> khỏi shop?\n\nChỉ số đã thiết lập cũng sẽ bị xóa!`,
+                confirmText: '<i class="fas fa-trash"></i> Xóa',
+                type: 'danger',
+                icon: 'fa-store'
+            });
+            if (!confirmed) return;
+            const result = await apiRequest(`/shop/items/${id}`, { method: 'DELETE' });
+            if (result?.success) {
+                showToast('Đã xóa vật phẩm khỏi shop!', 'success');
+                loadShop();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không xóa được'), 'error');
+            }
+        }
+
+        // ============ COSTUMES (CẢI TRANG) ============
+        async function loadCostumes() {
+            const data = await apiRequest('/costumes');
+            
+            if (!data?.success) {
+                document.getElementById('pageContent').innerHTML = `
+                    <div class="card"><div class="card-body">
+                        <div class="empty-state">
+                            <i class="fas fa-mask"></i>
+                            <h3>Lỗi tải dữ liệu cải trang</h3>
+                            <p>${data?.message || 'Không kết nối được server'}</p>
+                        </div>
+                    </div></div>`;
+                return;
+            }
+            
+            const costumes = data.costumes || [];
+            
+            function getCostumeIconHtml(item) {
+                const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><rect fill="#eee" width="60" height="60"/><text x="30" y="35" font-size="12" fill="#999" text-anchor="middle">${item.id}</text></svg>`;
+                const fallbackUrl = 'data:image/svg+xml,' + encodeURIComponent(fallbackSvg);
+                return `<img src="${item.iconUrl}" onerror="this.src='${fallbackUrl}'" style="width: 60px; height: 60px; object-fit: contain;">`;
+            }
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-mask"></i> Danh Sách Cải Trang</h3>
+                        <span style="color: var(--light-gray);">${costumes.length} cải trang (Type=5)</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm cải trang theo tên hoặc ID..." id="searchCostume" onkeyup="filterCostumes()">
+                            </div>
+                            <div class="search-box" style="max-width: 200px;">
+                                <select id="filterCostumeShop" onchange="filterCostumes()" style="background: transparent; border: none; color: var(--dark); flex: 1; padding: 0 10px; outline: none;">
+                                    <option value="">📦 Tất cả</option>
+                                    <option value="in_shop">✅ Đã có trong shop</option>
+                                    <option value="not_in_shop">❌ Chưa có trong shop</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="costume-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                            ${costumes.map(item => {
+                                const inShop = (item.shopItems || []).length > 0;
+                                const inShopBadge = inShop 
+                                    ? `<span style="background: var(--success); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;"><i class="fas fa-check"></i> Đã có trong shop (${item.shopItems.length})</span>`
+                                    : `<span style="background: var(--light-gray); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">Chưa có trong shop</span>`;
+                                const itemData = JSON.stringify(item).replace(/'/g, "&#39;");
+                                return `
+                                <div class="costume-card" data-name="${(item.name || '').toLowerCase()}" data-id="${item.id}" data-shop-status="${inShop ? 'in_shop' : 'not_in_shop'}" style="background: white; border: 2px solid #e0e6ed; border-radius: 12px; padding: 15px; transition: all 0.3s; cursor: pointer;">
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                                        <div style="flex-shrink: 0;">${getCostumeIconHtml(item)}</div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <h4 style="margin: 0; font-size: 0.95rem; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || 'Cải trang #' + item.id}</h4>
+                                            <small style="color: var(--light-gray);">ID: ${item.id} | Icon: ${item.icon_id}</small>
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 12px;">${inShopBadge}</div>
+                                    <p style="color: var(--light-gray); font-size: 0.85rem; margin: 0 0 12px 0; min-height: 30px;">${item.description || 'Không có mô tả'}</p>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button class="btn btn-sm btn-primary" onclick='editCostumeOptions(${itemData})'>
+                                            <i class="fas fa-cog"></i> Chỉ Số
+                                        </button>
+                                        <button class="btn btn-sm btn-success" onclick='addCostumeToShop(${itemData})' style="flex: 1;">
+                                            <i class="fas fa-cart-plus"></i> Thêm Vào Shop
+                                        </button>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('') || '<div style="grid-column: 1/-1; text-align: center; padding: 40px;"><i class="fas fa-mask" style="font-size: 48px; color: var(--light-gray);"></i><h3>Không có cải trang</h3></div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function filterCostumes() {
+            const search = (document.getElementById('searchCostume')?.value || '').toLowerCase().trim();
+            const status = document.getElementById('filterCostumeShop')?.value || '';
+            const cards = document.querySelectorAll('.costume-card');
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                const id = card.dataset.id || '';
+                const cardStatus = card.dataset.shopStatus || '';
+                const matchSearch = !search || name.includes(search) || id.includes(search);
+                const matchStatus = !status || cardStatus === status;
+                card.style.display = matchSearch && matchStatus ? '' : 'none';
+            });
+        }
+        
+        async function editCostumeOptions(costume) {
+            // First, check if costume is already in shop
+            const shopId = (costume.shopItems || [])[0]?.id;
+            let currentOptions = [];
+            let targetShopId = shopId;
+            
+            // Pre-load options template
+            await ensureOptionsLoaded();
+            
+            if (!targetShopId) {
+                // Not in shop yet - prompt user to add to shop first
+                const confirmed = await showConfirmDialog({
+                    title: 'Thêm Vào Shop Trước',
+                    message: `Cải trang <strong>"${costume.name}"</strong> chưa có trong shop.\n\nBạn cần thêm vào shop trước để chỉnh sửa chỉ số.\n\nBấm "Thêm Ngay" để thêm với giá mặc định 1000 ngọc vào tab Cải Trang.`,
+                    confirmText: '<i class="fas fa-cart-plus"></i> Thêm Ngay',
+                    cancelText: 'Để Sau',
+                    type: 'info',
+                    icon: 'fa-mask'
+                });
+                if (!confirmed) return;
+                const addResult = await quickAddCostumeToShop(costume, 1000, 1);
+                if (!addResult) return;
+                targetShopId = addResult;
+                currentOptions = [];
+            } else {
+                const optsData = await apiRequest(`/shop/items/${targetShopId}/options`);
+                currentOptions = optsData?.options || [];
+            }
+            
+            const allOptions = _allOptionsCache || [];
+            
+            const genderNames = { 0: 'Nam', 1: 'Nữ', 2: 'Nam', 3: 'Tất cả' };
+            
+            const optionsRows = currentOptions.map((opt, idx) => `
+                <tr data-idx="${idx}">
+                    <td>${buildOptionsSelect(opt.option_id)}</td>
+                    <td><input type="number" class="form-control opt-param" data-idx="${idx}" value="${opt.param}" style="width: 100px;"></td>
+                    <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('') || ''; // empty -> will show "add row" message
+            
+            const emptyMsg = currentOptions.length === 0 ? '<tr><td colspan="3" style="text-align: center; color: var(--light-gray); padding: 15px;">Chưa có chỉ số nào - bấm "Thêm dòng" để thêm</td></tr>' : '';
+            
+            showModal(`Chỉnh Sửa Chỉ Số: ${costume.name}`, `
+                <div style="margin-bottom: 15px; padding: 10px; background: rgba(52, 152, 219, 0.1); border-radius: 8px;">
+                    <strong>ID:</strong> ${costume.id} | <strong>Icon ID:</strong> ${costume.icon_id} | <strong>Giới tính:</strong> ${genderNames[costume.gender] || 'Tất cả'} | <strong>Shop ID:</strong> #${targetShopId}
+                </div>
+                <p style="color: var(--light-gray); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Chỉ số sẽ được lưu cho vật phẩm trong shop (Shop ID: #${targetShopId}). Sử dụng "#" trong template (VD: "Tấn công+#") - hệ thống sẽ thay thế bằng giá trị param của bạn.
+                </p>
+                <table style="width: 100%; margin-top: 15px;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="text-align: left; padding: 8px;">Tùy chọn</th>
+                            <th style="text-align: left; padding: 8px; width: 120px;">Giá trị</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="optionsEditorBody">${optionsRows}${emptyMsg}</tbody>
+                </table>
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: space-between;">
+                    <button type="button" class="btn btn-secondary" onclick="addNewOptionRow()">
+                        <i class="fas fa-plus"></i> Thêm dòng
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" onclick="closeAllModals()">Hủy</button>
+                        <button type="button" class="btn btn-primary" onclick="saveCostumeOptions(${targetShopId})">
+                            <i class="fas fa-save"></i> Lưu Chỉ Số
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+        
+        async function quickAddCostumeToShop(costume, cost, type_sell) {
+            // Use tab_id 33 (Cải Trang in shop_id 17)
+            const result = await apiRequest('/shop/items', {
+                method: 'POST',
+                body: JSON.stringify({
+                    tab_id: 33,
+                    temp_id: costume.id,
+                    cost: cost,
+                    type_sell: type_sell,
+                    is_new: 1,
+                    is_sell: 1,
+                    icon_spec: 0,
+                    options: []
+                })
+            });
+            if (result?.success) {
+                showToast('Đã thêm cải trang vào shop (ID: ' + result.id + ')', 'success');
+                return result.id;
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không thêm được'), 'error');
+                return null;
+            }
+        }
+        
+        let _allOptionsCache = null;
+        
+        async function ensureOptionsLoaded() {
+            if (_allOptionsCache) return _allOptionsCache;
+            const data = await apiRequest('/options/template');
+            _allOptionsCache = data?.options || [];
+            return _allOptionsCache;
+        }
+        
+        function buildOptionsSelect(selectedId) {
+            if (!_allOptionsCache) return '<select class="form-control opt-select"><option>Tải options...</option></select>';
+            return `<select class="form-control opt-select">${_allOptionsCache.map(o => `<option value="${o.id}" ${o.id == selectedId ? 'selected' : ''}>[${o.id}] ${o.NAME}</option>`).join('')}</select>`;
+        }
+        
+        async function addNewOptionRow() {
+            const allOpts = await ensureOptionsLoaded();
+            const tbody = document.getElementById('optionsEditorBody');
+            
+            // Remove empty message row if exists
+            const emptyCell = tbody.querySelector('td[colspan]');
+            if (emptyCell) tbody.innerHTML = '';
+            
+            const idx = tbody.querySelectorAll('tr').length;
+            const newRow = document.createElement('tr');
+            newRow.dataset.idx = idx;
+            newRow.innerHTML = `
+                <td>${buildOptionsSelect(0)}</td>
+                <td><input type="number" class="form-control opt-param" data-idx="${idx}" value="0" style="width: 100px;"></td>
+                <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();"><i class="fas fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+        
+        async function saveCostumeOptions(shopId) {
+            const rows = document.querySelectorAll('#optionsEditorBody tr');
+            const options = [];
+            rows.forEach(row => {
+                const optId = row.querySelector('.opt-select')?.value;
+                const param = row.querySelector('.opt-param')?.value;
+                if (optId && param !== '' && param !== null) {
+                    options.push({
+                        option_id: parseInt(optId),
+                        param: parseInt(param)
+                    });
+                }
+            });
+            
+            if (options.length === 0) {
+                showToast('Vui lòng thêm ít nhất 1 chỉ số', 'warning');
+                return;
+            }
+            
+            showToast('Đang lưu...', 'info');
+            
+            const result = await apiRequest(`/shop/items/${shopId}/options`, {
+                method: 'PUT',
+                body: JSON.stringify({ options })
+            });
+            
+            if (result?.success) {
+                showToast(`Đã lưu ${options.length} chỉ số cho shop item #${shopId}!`, 'success');
+                closeAllModals();
+                loadCostumes();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không lưu được'), 'error');
+            }
+        }
+        
+        async function addCostumeToShop(costume) {
+            // Fetch tabs to let user select
+            const tabsData = await apiRequest('/shop/tabs');
+            const sellTypesData = await apiRequest('/shop/sell-types');
+            const allTabs = (tabsData?.tabs || []).filter(t => t.NAME.includes('Cải Trang') || t.NAME.includes('cải trang'));
+            const allSellTypes = sellTypesData?.types || [];
+            
+            const tabsOptions = allTabs.map(t => `<option value="${t.id}">${t.NAME} (Tab #${t.id}, Shop ${t.shop_id})</option>`).join('');
+            const sellTypesOptions = allSellTypes.map(s => `<option value="${s.id}" ${s.id === 1 ? 'selected' : ''}>${s.NAME}</option>`).join('');
+            
+            showModal(`Thêm "${costume.name}" vào Shop`, `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="${costume.iconUrl}" style="width: 80px; height: 80px;">
+                    <h3>${costume.name}</h3>
+                    <p style="color: var(--light-gray);">ID: ${costume.id} | Icon: ${costume.icon_id}</p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label><strong>Tab Shop:</strong></label>
+                        <select class="form-control" id="addShopTab">
+                            ${tabsOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Loại tiền:</strong></label>
+                        <select class="form-control" id="addShopTypeSell">
+                            ${sellTypesOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Giá:</strong></label>
+                        <input type="number" class="form-control" id="addShopCost" placeholder="Nhập giá..." value="1000">
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Icon Spec (tùy chọn):</strong></label>
+                        <input type="number" class="form-control" id="addShopIconSpec" value="0">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>
+                        <input type="checkbox" id="addShopIsSell" checked> 
+                        <strong>Đang bán</strong>
+                    </label>
+                    &nbsp;&nbsp;
+                    <label>
+                        <input type="checkbox" id="addShopIsNew" checked> 
+                        <strong>Là vật phẩm mới</strong>
+                    </label>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeAllModals()">Hủy</button>
+                    <button class="btn btn-success" onclick="submitAddCostumeToShop(${JSON.stringify(costume).replace(/'/g, "&#39;")})">
+                        <i class="fas fa-cart-plus"></i> Thêm Vào Shop
+                    </button>
+                </div>
+            `);
+        }
+        
+        async function submitAddCostumeToShop(costume) {
+            const tab_id = parseInt(document.getElementById('addShopTab').value);
+            const cost = parseInt(document.getElementById('addShopCost').value);
+            const type_sell = parseInt(document.getElementById('addShopTypeSell').value);
+            const icon_spec = parseInt(document.getElementById('addShopIconSpec').value);
+            const is_sell = document.getElementById('addShopIsSell').checked ? 1 : 0;
+            const is_new = document.getElementById('addShopIsNew').checked ? 1 : 0;
+            
+            if (!cost || cost <= 0) {
+                showToast('Vui lòng nhập giá hợp lệ', 'error');
+                return;
+            }
+            
+            showToast('Đang thêm vào shop...', 'info');
+            
+            const result = await apiRequest('/shop/items', {
+                method: 'POST',
+                body: JSON.stringify({
+                    tab_id, temp_id: costume.id, cost, type_sell,
+                    is_new, is_sell, icon_spec, options: []
+                })
+            });
+            
+            if (result?.success) {
+                showToast(`Đã thêm "${costume.name}" vào shop (ID: ${result.id})!`, 'success');
+                closeAllModals();
+                loadCostumes();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không thêm được'), 'error');
+            }
+        }
+
+        // ============ BOSSES ============
+        async function loadBosses() {
+            const data = await apiRequest('/mobs');
+
+            if (!data?.success) {
+                document.getElementById('pageContent').innerHTML = `
+                    <div class="card"><div class="card-body">
+                        <div class="empty-state">
+                            <i class="fas fa-skull-crossbones"></i>
+                            <h3>Lỗi tải danh sách boss</h3>
+                            <p>${data?.message || 'Không kết nối được server'}</p>
+                        </div>
+                    </div></div>`;
+                return;
+            }
+
+            const mobs = data.mobs || [];
+            // Only real boss TYPE=4 (matches server isBoss for TYPE 4 only)
+            const bosses = mobs.filter(m => m.TYPE === 4 || (m.TYPE === 4 && m.hp >= 0));
+
+            // Color tier for HP
+            function getHpTier(hp) {
+                if (hp >= 100000000) return { color: '#e74c3c', label: 'Thần Thoại' };
+                if (hp >= 10000000) return { color: '#9b59b6', label: 'Huyền Thoại' };
+                if (hp >= 1000000) return { color: '#e67e22', label: 'Sử Thi' };
+                if (hp >= 100000) return { color: '#f39c12', label: 'Hiếm' };
+                if (hp >= 10000) return { color: '#3498db', label: 'Thường' };
+                return { color: '#95a5a6', label: 'Yếu' };
+            }
+
+            function formatHp(hp) {
+                if (hp >= 1000000000) return (hp / 1000000000).toFixed(2) + 'B';
+                if (hp >= 1000000) return (hp / 1000000).toFixed(2) + 'M';
+                if (hp >= 1000) return (hp / 1000).toFixed(1) + 'K';
+                return hp.toString();
+            }
+
+            // Build boss card with icon
+            function buildBossCard(mob) {
+                const tier = getHpTier(mob.hp);
+                const armor = mob.armor || 0;
+                const damage = mob.damage || 0;
+                const iconUrl = `/icons/x1/${mob.id}.png`;
+                const bossJson = JSON.stringify(mob).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                return `
+                    <div class="boss-card" data-boss-id="${mob.id}" data-name="${(mob.NAME || '').toLowerCase()}" data-hp="${mob.hp}" data-is-boss="true" data-type="${mob.TYPE}" style="background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-left: 4px solid ${tier.color}; padding: 15px; border-radius: 8px; margin-bottom: 10px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; gap: 15px; align-items: center;">
+                        <div style="flex-shrink: 0; width: 70px; height: 70px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px;">
+                            <img src="${iconUrl}" alt="${mob.NAME}" onerror="window.handleBossIconError && window.handleBossIconError(this, '${(mob.NAME || 'B').replace(/'/g, '')}')" style="width: 100%; height: 100%; object-fit: contain; image-rendering: -webkit-optimize-contrast;">
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                                <h4 style="margin: 0; color: var(--dark); font-size: 1.05rem;">${mob.NAME}</h4>
+                                <span class="badge" style="background: ${tier.color}; color: white; font-size: 0.7rem;">${tier.label}</span>
+                                <span class="badge" style="background: #6c5ce7; color: white; font-size: 0.7rem;">ID: ${mob.id}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 12px; font-size: 0.8rem;">
+                                <div><i class="fas fa-heart" style="color: #e74c3c;"></i> <strong>HP:</strong> <span style="color: ${tier.color};">${formatHp(mob.hp)}</span></div>
+                                <div><i class="fas fa-shield-alt" style="color: #3498db;"></i> <strong>Giáp:</strong> ${armor > 0 ? formatHp(armor) : '<span style="color: var(--light-gray);">0</span>'}</div>
+                                <div><i class="fas fa-bolt" style="color: #f39c12;"></i> <strong>SD:</strong> ${damage > 0 ? formatHp(damage) : '<span style="color: var(--light-gray);">0</span>'}</div>
+                                <div><i class="fas fa-tachometer-alt" style="color: #9b59b6;"></i> <strong>SPD:</strong> ${mob.speed || 1}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <button class="btn btn-sm btn-primary" onclick='editBoss(${bossJson})' title="Chỉnh sửa">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick='confirmDeleteBoss(${mob.id}, ${bossJson})' title="Xóa boss">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Store mobs in global for access
+            window._bossesCache = mobs;
+            window._bossesList = bosses;
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-skull-crossbones"></i> Quản Lý Boss</h3>
+                        <span style="color: var(--light-gray);" id="bossCount">
+                            <strong style="color: var(--primary);">${bosses.length}</strong> boss
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm boss theo tên hoặc ID..." id="searchBoss" onkeyup="filterBosses()">
+                            </div>
+                            <div class="search-box" style="max-width: 220px;">
+                                <select id="filterBossTier" onchange="filterBosses()" style="background: transparent; border: none; color: var(--dark); flex: 1; padding: 0 10px; outline: none;">
+                                    <option value="">⭐ Tất cả tier</option>
+                                    <option value="mythic">Thần Thoại (≥100M)</option>
+                                    <option value="legendary">Huyền Thoại (≥10M)</option>
+                                    <option value="epic">Sử Thi (≥1M)</option>
+                                    <option value="rare">Hiếm (≥100K)</option>
+                                    <option value="common">Thường (≥10K)</option>
+                                    <option value="weak">Yếu (&lt;10K)</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="resetBossFilter()">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <h4 style="color: #9b59b6;"><i class="fas fa-crown"></i> Danh Sách Boss (${bosses.length})</h4>
+                            <div id="bossList" style="margin-top: 10px;">
+                                ${bosses.length === 0
+                                    ? `<div style="text-align: center; padding: 40px; color: var(--light-gray);"><i class="fas fa-skull-crossbones" style="font-size: 48px; opacity: 0.3;"></i><h3>Chưa có boss nào</h3><p>Hãy thêm boss mới hoặc import từ database</p></div>`
+                                    : bosses.map(buildBossCard).join('')
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-edit"></i> Chỉnh Sửa Boss</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="bossEditArea">
+                            <div style="text-align: center; padding: 30px; color: var(--light-gray);">
+                                <i class="fas fa-hand-pointer" style="font-size: 36px;"></i>
+                                <p style="margin-top: 10px;">Chọn một boss ở trên và bấm "Sửa" để chỉnh sửa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterBosses() {
+            const search = (document.getElementById('searchBoss')?.value || '').toLowerCase().trim();
+            const tierFilter = document.getElementById('filterBossTier')?.value || '';
+
+            const cards = document.querySelectorAll('.boss-card');
+
+            function tierMatches(hp, tier) {
+                if (!tier) return true;
+                if (tier === 'mythic') return hp >= 100000000;
+                if (tier === 'legendary') return hp >= 10000000 && hp < 100000000;
+                if (tier === 'epic') return hp >= 1000000 && hp < 10000000;
+                if (tier === 'rare') return hp >= 100000 && hp < 1000000;
+                if (tier === 'common') return hp >= 10000 && hp < 100000;
+                if (tier === 'weak') return hp < 10000;
+                return true;
+            }
+
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                const id = card.dataset.bossId || '';
+                const hp = parseInt(card.dataset.hp) || 0;
+                const matchSearch = !search || name.includes(search) || id.includes(search);
+                const matchTier = tierMatches(hp, tierFilter);
+                card.style.display = matchSearch && matchTier ? '' : 'none';
+            });
+        }
+
+        function resetBossFilter() {
+            document.getElementById('searchBoss').value = '';
+            document.getElementById('filterBossTier').value = '';
+            filterBosses();
+        }
+
+        async function confirmDeleteBoss(bossId, boss) {
+            const bossName = (boss && boss.NAME) ? boss.NAME : ('ID ' + bossId);
+            const confirmed = await showConfirmDialog({
+                title: 'Xóa Boss',
+                message: `Bạn có chắc muốn xóa boss <strong>"${bossName}"</strong> (ID: ${bossId})?\n\nHành động này không thể hoàn tác!`,
+                confirmText: '<i class="fas fa-trash"></i> Xóa',
+                cancelText: 'Hủy',
+                type: 'danger',
+                icon: 'fa-skull-crossbones'
+            });
+            if (!confirmed) return;
+
+            const result = await apiRequest(`/mobs/${bossId}`, { method: 'DELETE' });
+            if (result?.success) {
+                showToast(`Đã xóa boss "${bossName}"!`, 'success');
+                loadBosses();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không xóa được'), 'error');
+            }
+        }
+
+        function editBoss(boss) {
+            const editArea = document.getElementById('bossEditArea');
+            if (!editArea) return;
+
+            editArea.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                    <div style="flex-shrink: 0; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                        <img src="/icons/x1/${boss.id}.png" alt="${boss.NAME}" onerror="window.handleBossIconError && window.handleBossIconError(this, '${(boss.NAME || 'B').replace(/'/g, '')}')" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0;"><i class="fas fa-edit"></i> Đang chỉnh sửa: ${boss.NAME}</h3>
+                        <small style="opacity: 0.85;">ID: ${boss.id} | Type: ${boss.TYPE}</small>
+                    </div>
+                </div>
+                ${buildBossEditFormHtml(boss)}
+            `;
+
+            // Default to basic tab
+            switchBossEditTab('basic');
+
+            editArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function switchBossEditTab(tab) {
+            document.querySelectorAll('.boss-edit-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.boss-edit-tab-content').forEach(c => c.classList.remove('active'));
+            const btn = document.getElementById('bossEditTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            const content = document.getElementById('bossEdit' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.add('active');
+        }
+
+        function buildBossEditFormHtml(boss) {
+            return `
+                <form id="editBossForm" onsubmit="event.preventDefault(); saveBossEdit(${boss.id});">
+                    <div style="background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <strong><i class="fas fa-info-circle"></i> Lưu ý</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #856404;">
+                            Thay đổi sẽ áp dụng khi boss được triệu hồi lại (sau khi bị tiêu diệt hoặc restart server).
+                        </p>
+                    </div>
+
+                    <div class="boss-edit-tabs" style="display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #e0e6ed;">
+                        <button type="button" class="boss-edit-tab-btn active" id="bossEditTabBasic" onclick="switchBossEditTab('basic')" style="padding: 10px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: var(--primary); border-bottom: 3px solid var(--primary); margin-bottom: -2px; transition: all 0.2s;">
+                            <i class="fas fa-heartbeat"></i> Cơ Bản
+                        </button>
+                        <button type="button" class="boss-edit-tab-btn" id="bossEditTabAdvanced" onclick="switchBossEditTab('advanced')" style="padding: 10px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: var(--light-gray); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s;">
+                            <i class="fas fa-cogs"></i> Nâng Cao
+                        </button>
+                    </div>
+
+                    <style>
+                        .boss-edit-tab-content { display: none; }
+                        .boss-edit-tab-content.active { display: block; animation: fadeIn 0.3s; }
+                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    </style>
+
+                    <!-- Tab Cơ Bản: HP / Giáp / SD + Tên -->
+                    <div class="boss-edit-tab-content active" id="bossEditBasic">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 6px;"><strong><i class="fas fa-tag"></i> Tên Boss</strong></label>
+                            <input type="text" class="form-control" id="bossName" value="${boss.NAME}" required style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px; font-size: 1rem;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-heart" style="color: #e74c3c;"></i> <strong>HP (Máu)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossHp" value="${boss.hp}" min="1" required style="width: 100%; padding: 12px; border: 2px solid #e0e6ed; border-radius: 6px; font-size: 1.05rem;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">Máu tối đa của boss</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-shield-alt" style="color: #3498db;"></i> <strong>Giáp (Armor)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossArmor" value="${boss.armor || 0}" min="0" required style="width: 100%; padding: 12px; border: 2px solid #e0e6ed; border-radius: 6px; font-size: 1.05rem;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">Giảm sát thương nhận vào</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-bolt" style="color: #f39c12;"></i> <strong>SD (Sát Thương)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossDamage" value="${boss.damage || 0}" min="0" required style="width: 100%; padding: 12px; border: 2px solid #e0e6ed; border-radius: 6px; font-size: 1.05rem;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">Sát thương mỗi đòn đánh</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Nâng Cao: speed / range_move / dart_type / percent_dame / percent_tiem_nang -->
+                    <div class="boss-edit-tab-content" id="bossEditAdvanced">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-tachometer-alt" style="color: #9b59b6;"></i> <strong>Tốc Độ (Speed)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossSpeed" value="${boss.speed || 1}" style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">Tốc độ di chuyển / tấn công</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-arrows-alt-h" style="color: #16a085;"></i> <strong>Tầm Đánh (Range Move)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossRangeMove" value="${boss.range_move || 0}" style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">Phạm vi tấn công</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-magic" style="color: #e74c3c;"></i> <strong>Loại Đòn (Dart Type)</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossDartType" value="${boss.dart_type || 0}" min="0" style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">0: cận chiến, 1: tầm xa, 2: đặc biệt</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 6px;">
+                                    <i class="fas fa-percentage" style="color: #d35400;"></i> <strong>% Dame</strong>
+                                </label>
+                                <input type="number" class="form-control" id="bossPercentDame" value="${boss.percent_dame || 5}" min="0" max="100" style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px;">
+                                <small style="color: var(--light-gray); font-size: 0.8rem;">% sát thương cộng thêm khi đánh trúng</small>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label style="display: block; margin-bottom: 6px;">
+                                <i class="fas fa-gem" style="color: #f39c12;"></i> <strong>% Tiềm Năng (TN)</strong>
+                            </label>
+                            <input type="number" class="form-control" id="bossPercentTn" value="${boss.percent_tiem_nang || 50}" min="0" max="1000" style="width: 100%; padding: 10px; border: 2px solid #e0e6ed; border-radius: 6px;">
+                            <small style="color: var(--light-gray); font-size: 0.8rem;">% TN boss rơi khi bị tiêu diệt (0-1000)</small>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="loadBosses()">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        async function saveBossEdit(bossId) {
+            const data = {
+                NAME: document.getElementById('bossName').value,
+                hp: parseInt(document.getElementById('bossHp').value),
+                armor: parseInt(document.getElementById('bossArmor').value),
+                damage: parseInt(document.getElementById('bossDamage').value),
+                speed: parseInt(document.getElementById('bossSpeed').value),
+                range_move: parseInt(document.getElementById('bossRangeMove').value),
+                dart_type: parseInt(document.getElementById('bossDartType').value),
+                percent_dame: parseInt(document.getElementById('bossPercentDame').value),
+                percent_tiem_nang: parseInt(document.getElementById('bossPercentTn').value)
+            };
+
+            if (!data.hp || data.hp < 1) {
+                showToast('HP phải lớn hơn 0', 'error');
+                switchBossEditTab('basic');
+                return;
+            }
+            if (isNaN(data.armor) || data.armor < 0) {
+                showToast('Giáp không hợp lệ', 'error');
+                switchBossEditTab('basic');
+                return;
+            }
+            if (isNaN(data.damage) || data.damage < 0) {
+                showToast('Sát thương không hợp lệ', 'error');
+                switchBossEditTab('basic');
+                return;
+            }
+
+            showToast('Đang lưu...', 'info');
+
+            const result = await apiRequest(`/mobs/${bossId}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            if (result?.success) {
+                showToast(`Đã lưu thay đổi cho boss ID ${bossId}!`, 'success');
+                loadBosses();
+            } else {
+                showToast('Lỗi: ' + (result?.message || 'Không lưu được'), 'error');
+            }
+        }
+
+        function summonAllBosses() {
+            showToast('Đang triệu hồi tất cả boss...', 'info');
+        }
+
+        // ============ HISTORY ============
+        async function loadHistory() {
+            const goldHistory = await apiRequest('/history/gold?limit=20');
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Lịch Sử Giao Dịch</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="tabs">
+                            <button class="tab active" onclick="showHistoryTab('gold')">Lịch Sử Vàng</button>
+                            <button class="tab" onclick="showHistoryTab('transactions')">Giao Dịch</button>
+                        </div>
+                        
+                        <div id="goldHistory" class="tab-content active">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Người Chơi</th>
+                                            <th>Số Vàng</th>
+                                            <th>Thời Gian</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${(goldHistory?.history || []).map(h => `
+                                            <tr>
+                                                <td>${h.id}</td>
+                                                <td>${h.name}</td>
+                                                <td><strong style="color: var(--warning);">${formatNumber(h.gold)}</strong></td>
+                                                <td>${new Date().toLocaleDateString('vi-VN')}</td>
+                                            </tr>
+                                        `).join('') || '<tr><td colspan="4" style="text-align: center;">Không có dữ liệu</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="transactionsHistory" class="tab-content">
+                            <div class="empty-state">
+                                <i class="fas fa-exchange-alt"></i>
+                                <h3>Giao Dịch</h3>
+                                <p>Không có dữ liệu giao dịch</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showHistoryTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'gold') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('goldHistory').classList.add('active');
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('transactionsHistory').classList.add('active');
+            }
+        }
+
+        // ============ SETTINGS ============
+        async function loadSettings() {
+            const data = await apiRequest('/settings');
+            const settings = data?.settings || {};
+
+            document.getElementById('pageContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cog"></i> Cài Đặt Server</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="settingsForm">
+                            <div class="settings-section">
+                                <h3><i class="fas fa-link"></i> Thông Tin Server</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Domain</label>
+                                        <input type="text" class="form-control" id="settingDomain" value="${settings.domain || 'http://localhost'}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Logo URL</label>
+                                        <input type="text" class="form-control" id="settingLogo" value="${settings.logo || ''}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3><i class="fas fa-download"></i> Link Download</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Android</label>
+                                        <input type="text" class="form-control" id="settingAndroid" value="${settings.android || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>iPhone</label>
+                                        <input type="text" class="form-control" id="settingIPhone" value="${settings.iphone || ''}">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Windows</label>
+                                        <input type="text" class="form-control" id="settingWindows" value="${settings.windows || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Java</label>
+                                        <input type="text" class="form-control" id="settingJava" value="${settings.java || ''}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3><i class="fas fa-percent"></i> Tỉ Lệ Server</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Tỉ Lệ EXP</label>
+                                        <input type="number" class="form-control" id="settingExpRate" value="1" min="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tỉ Lệ Hút Đồ</label>
+                                        <input type="number" class="form-control" id="settingDropRate" value="1" min="1" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3><i class="fas fa-server"></i> Trạng Thái Server</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Trạng Thái</label>
+                                        <select class="form-control" id="settingStatus">
+                                            <option value="hoatdong" ${settings.trangthai === 'hoatdong' ? 'selected' : ''}>Hoạt Động</option>
+                                            <option value="baotri" ${settings.trangthai === 'baotri' ? 'selected' : ''}>Bảo Trì</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> Lưu Cài Đặt
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveSettings() {
+            const data = {
+                domain: document.getElementById('settingDomain').value,
+                logo: document.getElementById('settingLogo').value,
+                android: document.getElementById('settingAndroid').value,
+                iphone: document.getElementById('settingIPhone').value,
+                windows: document.getElementById('settingWindows').value,
+                java: document.getElementById('settingJava').value,
+                trangthai: document.getElementById('settingStatus').value
+            };
+
+            const result = await apiRequest('/settings', {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            if (result?.success) {
+                showToast('Lưu cài đặt thành công!', 'success');
+            }
+        }
+
+        // ============ MODAL FUNCTIONS ============
+        function showModal(title, content, buttons = []) {
+            const container = document.getElementById('modalContainer');
+            const defaultButtons = [{ text: 'Đóng', class: 'btn-secondary', action: 'closeModal()' }];
+            const allButtons = buttons.length > 0 ? buttons : defaultButtons;
+
+            container.innerHTML = `
+                <div class="modal active" id="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>${title}</h2>
+                            <button class="modal-close" onclick="closeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            ${content}
+                        </div>
+                        <div class="modal-footer">
+                            ${allButtons.map(btn => `
+                                <button class="btn ${btn.class}" onclick="${btn.action}">${btn.text}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('modalContainer').innerHTML = '';
+        }
+
+        // ============ CUSTOM DIALOGS (UIUX) ============
+        // Promise-based confirm dialog
+        function showConfirmDialog(options) {
+            return new Promise((resolve) => {
+                const opts = {
+                    title: 'Xác Nhận',
+                    message: '',
+                    confirmText: 'Xác nhận',
+                    cancelText: 'Hủy',
+                    type: 'warning', // 'danger' | 'warning' | 'info' | 'success'
+                    icon: null,
+                    ...options
+                };
+                
+                const iconMap = {
+                    danger: 'fa-exclamation-triangle',
+                    warning: 'fa-question-circle',
+                    info: 'fa-info-circle',
+                    success: 'fa-check-circle'
+                };
+                const colorMap = {
+                    danger: 'var(--danger)',
+                    warning: 'var(--warning)',
+                    info: 'var(--info)',
+                    success: 'var(--success)'
+                };
+                
+                const iconClass = opts.icon || iconMap[opts.type] || iconMap.warning;
+                const iconColor = colorMap[opts.type] || colorMap.warning;
+                
+                const container = document.getElementById('modalContainer');
+                const modalId = 'confirmModal_' + Date.now();
+                
+                container.innerHTML = `
+                    <div class="modal active" id="${modalId}">
+                        <div class="modal-content" style="max-width: 450px;">
+                            <div class="modal-header">
+                                <h2 style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas ${iconClass}" style="color: ${iconColor};"></i>
+                                    ${opts.title}
+                                </h2>
+                                <button class="modal-close" data-action="cancel">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <div style="padding: 10px 5px; font-size: 1rem; color: var(--dark); line-height: 1.6; white-space: pre-line;">
+                                    ${opts.message}
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
+                                <button class="btn btn-secondary" data-action="cancel">${opts.cancelText}</button>
+                                <button class="btn ${opts.type === 'danger' ? 'btn-danger' : opts.type === 'success' ? 'btn-success' : 'btn-primary'}" data-action="confirm">${opts.confirmText}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const modal = document.getElementById(modalId);
+                
+                const close = (result) => {
+                    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+                    document.removeEventListener('keydown', keyHandler);
+                    resolve(result);
+                };
+                
+                const keyHandler = (e) => {
+                    if (e.key === 'Escape') close(false);
+                    else if (e.key === 'Enter') close(true);
+                };
+                document.addEventListener('keydown', keyHandler);
+                
+                modal.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        close(btn.dataset.action === 'confirm');
+                    });
+                });
+                
+                // Focus confirm button
+                setTimeout(() => {
+                    const confirmBtn = modal.querySelector('[data-action="confirm"]');
+                    if (confirmBtn) confirmBtn.focus();
+                }, 50);
+            });
+        }
+        
+        // Promise-based prompt dialog
+        function showPromptDialog(options) {
+            return new Promise((resolve) => {
+                const opts = {
+                    title: 'Nhập Thông Tin',
+                    message: '',
+                    label: '',
+                    defaultValue: '',
+                    placeholder: '',
+                    inputType: 'number', // 'number' | 'text'
+                    min: null,
+                    max: null,
+                    confirmText: 'OK',
+                    cancelText: 'Hủy',
+                    required: true,
+                    ...options
+                };
+                
+                const container = document.getElementById('modalContainer');
+                const modalId = 'promptModal_' + Date.now();
+                const inputId = 'promptInput_' + Date.now();
+                
+                const minAttr = opts.min !== null ? `min="${opts.min}"` : '';
+                const maxAttr = opts.max !== null ? `max="${opts.max}"` : '';
+                
+                container.innerHTML = `
+                    <div class="modal active" id="${modalId}">
+                        <div class="modal-content" style="max-width: 450px;">
+                            <div class="modal-header">
+                                <h2 style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-edit" style="color: var(--primary);"></i>
+                                    ${opts.title}
+                                </h2>
+                                <button class="modal-close" data-action="cancel">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                ${opts.message ? `<div style="padding: 0 5px 10px; color: var(--dark); line-height: 1.5; white-space: pre-line;">${opts.message}</div>` : ''}
+                                ${opts.label ? `<label style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--dark);">${opts.label}</label>` : ''}
+                                <input type="${opts.inputType}" 
+                                       id="${inputId}"
+                                       class="form-control" 
+                                       value="${opts.defaultValue}" 
+                                       placeholder="${opts.placeholder}"
+                                       ${minAttr} ${maxAttr}
+                                       style="width: 100%; padding: 10px; font-size: 1rem; border: 2px solid #e0e6ed; border-radius: 8px; outline: none; transition: all 0.2s;">
+                                <div id="${inputId}_error" style="color: var(--danger); font-size: 0.85rem; margin-top: 5px; display: none;"></div>
+                            </div>
+                            <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
+                                <button class="btn btn-secondary" data-action="cancel">${opts.cancelText}</button>
+                                <button class="btn btn-primary" data-action="confirm">${opts.confirmText}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const modal = document.getElementById(modalId);
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(inputId + '_error');
+                
+                input.focus();
+                input.select();
+                
+                const close = (result) => {
+                    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+                    document.removeEventListener('keydown', keyHandler);
+                    resolve(result);
+                };
+                
+                const showError = (msg) => {
+                    errorDiv.textContent = msg;
+                    errorDiv.style.display = 'block';
+                    input.style.borderColor = 'var(--danger)';
+                };
+                
+                const clearError = () => {
+                    errorDiv.style.display = 'none';
+                    input.style.borderColor = '#e0e6ed';
+                };
+                
+                input.addEventListener('input', clearError);
+                
+                const keyHandler = (e) => {
+                    if (e.key === 'Escape') close(null);
+                    else if (e.key === 'Enter') {
+                        const val = input.value.trim();
+                        if (opts.required && val === '') {
+                            showError('Vui lòng nhập giá trị');
+                            return;
+                        }
+                        if (opts.inputType === 'number') {
+                            const num = parseFloat(val);
+                            if (isNaN(num)) {
+                                showError('Vui lòng nhập số hợp lệ');
+                                return;
+                            }
+                            if (opts.min !== null && num < opts.min) {
+                                showError(`Giá trị tối thiểu là ${opts.min}`);
+                                return;
+                            }
+                            if (opts.max !== null && num > opts.max) {
+                                showError(`Giá trị tối đa là ${opts.max}`);
+                                return;
+                            }
+                            close(num);
+                        } else {
+                            close(val);
+                        }
+                    }
+                };
+                document.addEventListener('keydown', keyHandler);
+                
+                modal.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.dataset.action === 'cancel') {
+                            close(null);
+                        } else {
+                            const val = input.value.trim();
+                            if (opts.required && val === '') {
+                                showError('Vui lòng nhập giá trị');
+                                return;
+                            }
+                            if (opts.inputType === 'number') {
+                                const num = parseFloat(val);
+                                if (isNaN(num)) {
+                                    showError('Vui lòng nhập số hợp lệ');
+                                    return;
+                                }
+                                close(num);
+                            } else {
+                                close(val);
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // ============ INIT ============
+        async function init() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentAdmin = data.admin;
+                    document.getElementById('userName').textContent = data.admin.username;
+                    document.getElementById('userAvatar').textContent = data.admin.username.charAt(0).toUpperCase();
+                    loadPage('dashboard');
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Init error:', error);
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
