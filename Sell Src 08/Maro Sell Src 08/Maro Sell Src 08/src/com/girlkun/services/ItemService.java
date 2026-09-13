@@ -31,8 +31,8 @@ public class ItemService {
         ItemMap item = createItemMapSetKichHoat(zone, tempId, quantity, x, y, playerId);
         if (item != null) {
             item.options.addAll(ItemService.gI().getListOptionItemShop((short) tempId));
-            item.options.add(new Item.ItemOption(skhid, 1));
-            item.options.add(new Item.ItemOption(optionIdSKH(skhid), 1));
+            item.options.add(new Item.ItemOption(skhid, 2));
+            item.options.add(new Item.ItemOption(optionIdSKH(skhid), skhOptionParam(optionIdSKH(skhid))));
             item.options.add(new Item.ItemOption(30, 1));
         }
         return item;
@@ -41,8 +41,8 @@ public class ItemService {
         ItemMap item = createItemMapSetKichHoat(zone, tempId, quantity, x, y, playerId);
         if (item != null) {
             item.options.addAll(ItemService.gI().getListOptionItemShop((short) tempId));
-            item.options.add(new Item.ItemOption(skhid, 1));
-            item.options.add(new Item.ItemOption(optionIdSKHLV(skhid), 80));
+            item.options.add(new Item.ItemOption(skhid, 2));
+            item.options.add(new Item.ItemOption(optionIdSKHLV(skhid), skhOptionParam(optionIdSKHLV(skhid))));
             item.options.add(new Item.ItemOption(30, 1));
         }
         return item;
@@ -414,11 +414,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(127, 0));
             giay.itemOptions.add(new Item.ItemOption(127, 0));
             nhan.itemOptions.add(new Item.ItemOption(127, 0));
-            ao.itemOptions.add(new Item.ItemOption(139, 0));
-            quan.itemOptions.add(new Item.ItemOption(139, 0));
-            gang.itemOptions.add(new Item.ItemOption(139, 0));
-            giay.itemOptions.add(new Item.ItemOption(139, 0));
-            nhan.itemOptions.add(new Item.ItemOption(139, 0));
+            ao.itemOptions.add(new Item.ItemOption(139, 2));
+            quan.itemOptions.add(new Item.ItemOption(139, 2));
+            gang.itemOptions.add(new Item.ItemOption(139, 2));
+            giay.itemOptions.add(new Item.ItemOption(139, 2));
+            nhan.itemOptions.add(new Item.ItemOption(139, 2));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -453,11 +453,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(128, 0));
             giay.itemOptions.add(new Item.ItemOption(128, 0));
             nhan.itemOptions.add(new Item.ItemOption(128, 0));
-            ao.itemOptions.add(new Item.ItemOption(140, 0));
-            quan.itemOptions.add(new Item.ItemOption(140, 0));
-            gang.itemOptions.add(new Item.ItemOption(140, 0));
-            giay.itemOptions.add(new Item.ItemOption(140, 0));
-            nhan.itemOptions.add(new Item.ItemOption(140, 0));
+            ao.itemOptions.add(new Item.ItemOption(140, 100));
+            quan.itemOptions.add(new Item.ItemOption(140, 100));
+            gang.itemOptions.add(new Item.ItemOption(140, 100));
+            giay.itemOptions.add(new Item.ItemOption(140, 100));
+            nhan.itemOptions.add(new Item.ItemOption(140, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -492,11 +492,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(129, 0));
             giay.itemOptions.add(new Item.ItemOption(129, 0));
             nhan.itemOptions.add(new Item.ItemOption(129, 0));
-            ao.itemOptions.add(new Item.ItemOption(141, 0));
-            quan.itemOptions.add(new Item.ItemOption(141, 0));
-            gang.itemOptions.add(new Item.ItemOption(141, 0));
-            giay.itemOptions.add(new Item.ItemOption(141, 0));
-            nhan.itemOptions.add(new Item.ItemOption(141, 0));
+            ao.itemOptions.add(new Item.ItemOption(141, 100));
+            quan.itemOptions.add(new Item.ItemOption(141, 100));
+            gang.itemOptions.add(new Item.ItemOption(141, 100));
+            giay.itemOptions.add(new Item.ItemOption(141, 100));
+            nhan.itemOptions.add(new Item.ItemOption(141, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -531,11 +531,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(130, 0));
             giay.itemOptions.add(new Item.ItemOption(130, 0));
             nhan.itemOptions.add(new Item.ItemOption(130, 0));
-            ao.itemOptions.add(new Item.ItemOption(142, 0));
-            quan.itemOptions.add(new Item.ItemOption(142, 0));
-            gang.itemOptions.add(new Item.ItemOption(142, 0));
-            giay.itemOptions.add(new Item.ItemOption(142, 0));
-            nhan.itemOptions.add(new Item.ItemOption(142, 0));
+            ao.itemOptions.add(new Item.ItemOption(142, 100));
+            quan.itemOptions.add(new Item.ItemOption(142, 100));
+            gang.itemOptions.add(new Item.ItemOption(142, 100));
+            giay.itemOptions.add(new Item.ItemOption(142, 100));
+            nhan.itemOptions.add(new Item.ItemOption(142, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -570,11 +570,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(131, 0));
             giay.itemOptions.add(new Item.ItemOption(131, 0));
             nhan.itemOptions.add(new Item.ItemOption(131, 0));
-            ao.itemOptions.add(new Item.ItemOption(143, 0));
-            quan.itemOptions.add(new Item.ItemOption(143, 0));
-            gang.itemOptions.add(new Item.ItemOption(143, 0));
-            giay.itemOptions.add(new Item.ItemOption(143, 0));
-            nhan.itemOptions.add(new Item.ItemOption(143, 0));
+            ao.itemOptions.add(new Item.ItemOption(143, 100));
+            quan.itemOptions.add(new Item.ItemOption(143, 100));
+            gang.itemOptions.add(new Item.ItemOption(143, 100));
+            giay.itemOptions.add(new Item.ItemOption(143, 100));
+            nhan.itemOptions.add(new Item.ItemOption(143, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -609,11 +609,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(132, 0));
             giay.itemOptions.add(new Item.ItemOption(132, 0));
             nhan.itemOptions.add(new Item.ItemOption(132, 0));
-            ao.itemOptions.add(new Item.ItemOption(144, 0));
-            quan.itemOptions.add(new Item.ItemOption(144, 0));
-            gang.itemOptions.add(new Item.ItemOption(144, 0));
-            giay.itemOptions.add(new Item.ItemOption(144, 0));
-            nhan.itemOptions.add(new Item.ItemOption(144, 0));
+            ao.itemOptions.add(new Item.ItemOption(144, 100));
+            quan.itemOptions.add(new Item.ItemOption(144, 100));
+            gang.itemOptions.add(new Item.ItemOption(144, 100));
+            giay.itemOptions.add(new Item.ItemOption(144, 100));
+            nhan.itemOptions.add(new Item.ItemOption(144, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -648,11 +648,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(133, 0));
             giay.itemOptions.add(new Item.ItemOption(133, 0));
             nhan.itemOptions.add(new Item.ItemOption(133, 0));
-            ao.itemOptions.add(new Item.ItemOption(136, 0));
-            quan.itemOptions.add(new Item.ItemOption(136, 0));
-            gang.itemOptions.add(new Item.ItemOption(136, 0));
-            giay.itemOptions.add(new Item.ItemOption(136, 0));
-            nhan.itemOptions.add(new Item.ItemOption(136, 0));
+            ao.itemOptions.add(new Item.ItemOption(136, 100));
+            quan.itemOptions.add(new Item.ItemOption(136, 100));
+            gang.itemOptions.add(new Item.ItemOption(136, 100));
+            giay.itemOptions.add(new Item.ItemOption(136, 100));
+            nhan.itemOptions.add(new Item.ItemOption(136, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -687,11 +687,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(134, 0));
             giay.itemOptions.add(new Item.ItemOption(134, 0));
             nhan.itemOptions.add(new Item.ItemOption(134, 0));
-            ao.itemOptions.add(new Item.ItemOption(137, 0));
-            quan.itemOptions.add(new Item.ItemOption(137, 0));
-            gang.itemOptions.add(new Item.ItemOption(137, 0));
-            giay.itemOptions.add(new Item.ItemOption(137, 0));
-            nhan.itemOptions.add(new Item.ItemOption(137, 0));
+            ao.itemOptions.add(new Item.ItemOption(137, 2));
+            quan.itemOptions.add(new Item.ItemOption(137, 2));
+            gang.itemOptions.add(new Item.ItemOption(137, 2));
+            giay.itemOptions.add(new Item.ItemOption(137, 2));
+            nhan.itemOptions.add(new Item.ItemOption(137, 2));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -726,11 +726,11 @@ public class ItemService {
             gang.itemOptions.add(new Item.ItemOption(135, 0));
             giay.itemOptions.add(new Item.ItemOption(135, 0));
             nhan.itemOptions.add(new Item.ItemOption(135, 0));
-            ao.itemOptions.add(new Item.ItemOption(138, 0));
-            quan.itemOptions.add(new Item.ItemOption(138, 0));
-            gang.itemOptions.add(new Item.ItemOption(138, 0));
-            giay.itemOptions.add(new Item.ItemOption(138, 0));
-            nhan.itemOptions.add(new Item.ItemOption(138, 0));
+            ao.itemOptions.add(new Item.ItemOption(138, 100));
+            quan.itemOptions.add(new Item.ItemOption(138, 100));
+            gang.itemOptions.add(new Item.ItemOption(138, 100));
+            giay.itemOptions.add(new Item.ItemOption(138, 100));
+            nhan.itemOptions.add(new Item.ItemOption(138, 100));
             ao.itemOptions.add(new Item.ItemOption(30, 0));
             quan.itemOptions.add(new Item.ItemOption(30, 0));
             gang.itemOptions.add(new Item.ItemOption(30, 0));
@@ -756,9 +756,10 @@ public class ItemService {
         Item item = createItemSetKichHoat(itemId, 1);
         if (item != null) {
             item.itemOptions.addAll(ItemService.gI().getListOptionItemShop((short) itemId));
-            item.itemOptions.add(new Item.ItemOption(skhId, 1));
-            item.itemOptions.add(new Item.ItemOption(optionIdSKH(skhId), 1));
+            item.itemOptions.add(new Item.ItemOption(skhId, 2));
+            item.itemOptions.add(new Item.ItemOption(optionIdSKH(skhId), skhOptionParam(optionIdSKH(skhId))));
             item.itemOptions.add(new Item.ItemOption(30, 1));
+            item.info = item.getInfo();
         }
         return item;
     }
@@ -813,6 +814,10 @@ public class ItemService {
                 return 138;
         }
         return 0;
+    }
+
+    public int skhOptionParam(int optionId) {
+        return optionId == 137 || optionId == 139 ? 2 : 100;
     }
     public int optionIdSKHLV(int skhId) {
         switch (skhId) {
@@ -948,6 +953,8 @@ public class ItemService {
         gang.itemOptions.add(new ItemOption(241, 0));
         giay.itemOptions.add(new ItemOption(241, 0));
         rd.itemOptions.add(new ItemOption(241, 0));
+        giay.itemOptions.add(new ItemOption(241, 0));
+        rd.itemOptions.add(new ItemOption(241, 0));
         ao.itemOptions.add(new ItemOption(222, 0));
         quan.itemOptions.add(new ItemOption(222, 0));
         gang.itemOptions.add(new ItemOption(222, 0));
@@ -983,6 +990,9 @@ public class ItemService {
         ao.itemOptions.add(new ItemOption(242, 0));
         quan.itemOptions.add(new ItemOption(242, 0));
         gang.itemOptions.add(new ItemOption(242, 0));
+            ao.itemOptions.add(new ItemOption(141, 100));
+            quan.itemOptions.add(new ItemOption(141, 100));
+            gang.itemOptions.add(new ItemOption(141, 100));
         giay.itemOptions.add(new ItemOption(242, 0));
         rd.itemOptions.add(new ItemOption(242, 0));
         ao.itemOptions.add(new ItemOption(223, 0));
@@ -1020,6 +1030,9 @@ public class ItemService {
         ao.itemOptions.add(new ItemOption(245, 0));
         quan.itemOptions.add(new ItemOption(245, 0));
         gang.itemOptions.add(new ItemOption(245, 0));
+            ao.itemOptions.add(new ItemOption(142, 100));
+            quan.itemOptions.add(new ItemOption(142, 100));
+            gang.itemOptions.add(new ItemOption(142, 100));
         giay.itemOptions.add(new ItemOption(245, 0));
         rd.itemOptions.add(new ItemOption(245, 0));
 
@@ -1058,6 +1071,9 @@ public class ItemService {
         ao.itemOptions.add(new ItemOption(244, 0));
         quan.itemOptions.add(new ItemOption(244, 0));
         gang.itemOptions.add(new ItemOption(244, 0));
+            ao.itemOptions.add(new ItemOption(143, 100));
+            quan.itemOptions.add(new ItemOption(143, 100));
+            gang.itemOptions.add(new ItemOption(143, 100));
         giay.itemOptions.add(new ItemOption(244, 0));
         rd.itemOptions.add(new ItemOption(244, 0));
 
@@ -1096,6 +1112,9 @@ public class ItemService {
         ao.itemOptions.add(new ItemOption(246, 0));
         quan.itemOptions.add(new ItemOption(246, 0));
         gang.itemOptions.add(new ItemOption(246, 0));
+            ao.itemOptions.add(new ItemOption(144, 100));
+            quan.itemOptions.add(new ItemOption(144, 100));
+            gang.itemOptions.add(new ItemOption(144, 100));
         giay.itemOptions.add(new ItemOption(246, 0));
         rd.itemOptions.add(new ItemOption(246, 0));
 

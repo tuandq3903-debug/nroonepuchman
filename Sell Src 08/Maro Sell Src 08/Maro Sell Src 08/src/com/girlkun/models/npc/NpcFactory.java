@@ -2519,7 +2519,7 @@ public class NpcFactory {
                     if (this.mapId == 5) {
                         this.createOtherMenu(player, ConstNpc.BASE_MENU,
                                 "Ngươi tìm ta có việc gì?",
-                                "Ép sao\ntrang bị", "Pha lê\nhóa trang bị", "Pháp sư\ntrang bị", "Nâng Cấp\nLevel SKH", "Võ Đài\nBà Hạt Mít");
+                                "Ép sao\ntrang bị", "Pha lê\nhóa trang bị", "Pháp sư\ntrang bị", "Nâng Cấp\nSKH", "Võ Đài\nBà Hạt Mít");
                     } else if (this.mapId == 121) {
                         this.createOtherMenu(player, ConstNpc.BASE_MENU,
                                 "Ngươi tìm ta có việc gì?",
@@ -2580,9 +2580,9 @@ public class NpcFactory {
                                     break;
                                 case 3:
                                     this.createOtherMenu(player, ConstNpc.NANG_CAP_LEVEL,
-                                            "Ở Đây Ta Đổi Đồ Thần Ra Đá Nâng Cấp Và Nâng Cấp Level SKH\n"
+                                            "Ở Đây Ta Đổi Đồ Hủy Diệt Thành Đồ SKH\n"
                                             + "Ngươi Muốn Làm Gì?\n",
-                                            "Nâng Cấp\nLevel SKH", "Phân Rã Đồ Thần");
+                                            "Nâng Cấp\nSKH", "Nâng Cấp SKH\nVIP", "Nâng Cấp SKH\nTL", "Nâng Cấp SKH\nHD", "Nâng Cấp SKH\nThiên Sứ", "Phân Rã Đồ Thần");
                                     break;
                                 case 4:
                                     ChangeMapService.gI().changeMapNonSpaceship(player, 112, 203, 408);
@@ -2603,6 +2603,18 @@ public class NpcFactory {
                                     CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.NANG_CAP_LEVEL_SKH);
                                     break;
                                 case 1:
+                                    CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.NANG_CAP_SKH_VIP_DHD);
+                                    break;
+                                case 2:
+                                    CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.NANG_CAP_SKH_TL);
+                                    break;
+                                case 3:
+                                    CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.NANG_CAP_SKH_HD);
+                                    break;
+                                case 4:
+                                    CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.NANG_CAP_SKH_TS);
+                                    break;
+                                case 5:
                                     CombineServiceNew.gI().openTabCombine(player, CombineServiceNew.PHAN_RA_DO_THAN_RA_DA_NANG_CAP);
                                     break;
                             }
@@ -2613,6 +2625,10 @@ public class NpcFactory {
                                 case CombineServiceNew.PS_HOA_TRANG_BI:
                                 case CombineServiceNew.TAY_PS_HOA_TRANG_BI:
                                 case CombineServiceNew.NANG_CAP_LEVEL_SKH:
+                                case CombineServiceNew.NANG_CAP_SKH_VIP_DHD:
+                                case CombineServiceNew.NANG_CAP_SKH_TL:
+                                case CombineServiceNew.NANG_CAP_SKH_HD:
+                                case CombineServiceNew.NANG_CAP_SKH_TS:
                                 case CombineServiceNew.PHAN_RA_DO_THAN_RA_DA_NANG_CAP:
                                     CombineServiceNew.gI().startCombine(player, select);
                                     break;

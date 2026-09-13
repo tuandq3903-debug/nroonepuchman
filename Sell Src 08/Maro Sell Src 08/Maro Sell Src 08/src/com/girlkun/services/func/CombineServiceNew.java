@@ -71,6 +71,32 @@ public class CombineServiceNew {
 
     public static final int NANG_CAP_LEVEL_SKH = 1238;
     public static final int PHAN_RA_DO_THAN_RA_DA_NANG_CAP = 1239;
+    public static final int NANG_CAP_SKH_VIP_DHD = 1240;
+        public static final int NANG_CAP_SKH_TL = 1241;
+        public static final int NANG_CAP_SKH_HD = 1242;
+        public static final int NANG_CAP_SKH_TS = 1243;
+
+        private static final int[][] ITEM_DHD = {
+            {650, 651, 657, 658, 656},
+            {652, 653, 659, 660, 656},
+            {654, 655, 661, 662, 656}
+        };
+        private static final int[][] ITEM_DTS = {
+            {1048, 1051, 1054, 1057, 1060},
+            {1049, 1052, 1055, 1058, 1061},
+            {1050, 1053, 1056, 1059, 1062}
+        };
+
+        private static final int[][] TY_LE_SET_SKH = {
+            {25, 35, 40},
+            {25, 35, 40},
+            {25, 35, 40}
+        };
+        private static final int[][][] TY_LE_PHAN_KHUC_SKH_VIP = {
+            {{70, 25, 5}, {70, 25, 5}, {70, 25, 5}, {70, 25, 5}},
+            {{70, 25, 5}, {70, 25, 5}, {70, 25, 5}, {70, 25, 5}},
+            {{70, 25, 5}, {70, 25, 5}, {70, 25, 5}, {70, 25, 5}}
+        };
 
     private final Npc baHatMit;
     private final Npc granala;
@@ -161,115 +187,15 @@ public class CombineServiceNew {
                 }
                 break;
             case NANG_CAP_LEVEL_SKH:
-                if (player.combineNew.itemsCombine.size() >= 3 && player.combineNew.itemsCombine.size() < 4) {
-                    if (player.combineNew.itemsCombine.stream().filter(item -> item.isNotNullItem() && item.template.type < 5).count() < 1) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Thiếu SKH để nâng cấp", "Đóng");
-                        break;
-                    }
-                    if (player.combineNew.itemsCombine.stream().filter(item -> item.isNotNullItem() && item.template.type == 14).count() < 1) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Thiếu đá nâng cấp", "Đóng");
-                        break;
-                    }
-                    if (player.combineNew.itemsCombine.stream().filter(item -> item.isNotNullItem() && item.isDTL()).count() < 1) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Thiếu 1 món đồ thần linh", "Đóng");
-                        break;
-                    }
-                    Item itemDo = null;
-                    Item itemDNC = null;
-                    Item itemDBV = null;
-                    for (int j = 0; j < player.combineNew.itemsCombine.size(); j++) {
-                        if (player.combineNew.itemsCombine.get(j).isNotNullItem()) {
-                            if (player.combineNew.itemsCombine.size() == 3 && player.combineNew.itemsCombine.get(j).template.id == 987) {
-                                itemDBV = player.combineNew.itemsCombine.get(j);
-                                continue;
-                            }
-                            if (player.combineNew.itemsCombine.get(j).template.type < 5) {
-                                itemDo = player.combineNew.itemsCombine.get(j);
-                            } else {
-                                itemDNC = player.combineNew.itemsCombine.get(j);
-                            }
-                        }
-                    }
-                    if (isCoupleItemNangCapSKHCheck(itemDo, itemDNC)) {
-                        int level = 0;
-                        String optionskh = null;
-                        for (ItemOption io : itemDo.itemOptions) {
-                            if (io.optionTemplate.id == 223
-                                    || io.optionTemplate.id == 224
-                                    || io.optionTemplate.id == 225
-                                    || io.optionTemplate.id == 226
-                                    || io.optionTemplate.id == 227
-                                    || io.optionTemplate.id == 228
-                                    || io.optionTemplate.id == 229
-                                    || io.optionTemplate.id == 230
-                                    || io.optionTemplate.id == 231) {
-                                level = io.param;
-                                optionskh = io.optionTemplate.name;
-                                break;
-                            }
-                        }
-                        if (level < MAX_LEVEL_SKH) {
-                            player.combineNew.goldCombine = getGoldNangCapDo(level);
-                            player.combineNew.ratioCombine = (float) getTileNangCapSKH(level);
-                            player.combineNew.countDaNangCap = getCountDaNangCapSKH(level);
-                            player.combineNew.countDaBaoVe = (short) getCountDaBaoVe(level);
-                            String npcSay = "|2|Hiện tại "
-                                    + itemDo.template.name + "\n|0|"
-                                    + optionskh.replaceAll("#", String.valueOf("+" + level)) + "\n";
-                            String option = null;
-                            int param = 0;
-                            for (ItemOption io : itemDo.itemOptions) {
-                                if (io.optionTemplate.id == 232
-                                        || io.optionTemplate.id == 233
-                                        || io.optionTemplate.id == 234
-                                        || io.optionTemplate.id == 235
-                                        || io.optionTemplate.id == 236
-                                        || io.optionTemplate.id == 237
-                                        || io.optionTemplate.id == 238
-                                        || io.optionTemplate.id == 239
-                                        || io.optionTemplate.id == 240) {
-                                    option = io.optionTemplate.name;
-                                    param = io.param + 20;
-                                    break;
-                                }
-                            }
-                            npcSay += "|2|Sau khi nâng cấp (+" + (level + 1) + ")\n|7|"
-                                    + option.replaceAll("#", String.valueOf(param))
-                                    + "\n|7|Tỉ lệ thành công: " + player.combineNew.ratioCombine + "%\n"
-                                    + (player.combineNew.countDaNangCap > itemDNC.quantity ? "|7|" : "|1|")
-                                    + "Cần " + player.combineNew.countDaNangCap + " " + itemDNC.template.name
-                                    + "\n" + (player.combineNew.goldCombine > player.inventory.gold ? "|7|" : "|1|")
-                                    + "Cần " + Util.numberToMoney(player.combineNew.goldCombine) + " vàng";
-
-                            String daNPC = player.combineNew.itemsCombine.size() == 3 && itemDBV != null ? String.format("\nCần tốn %s đá bảo vệ", player.combineNew.countDaBaoVe) : "";
-                            if ((level == 2 || level == 4 || level == 6) && !(player.combineNew.itemsCombine.size() == 3 && itemDBV != null)) {
-                                npcSay += "\nNếu thất bại sẽ rớt xuống (+" + (level - 1) + ")";
-                            }
-                            if (player.combineNew.countDaNangCap > itemDNC.quantity) {
-                                this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                        npcSay, "Còn thiếu\n" + (player.combineNew.countDaNangCap - itemDNC.quantity) + " " + itemDNC.template.name);
-                            } else if (player.combineNew.goldCombine > player.inventory.gold) {
-                                this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                        npcSay, "Còn thiếu\n" + Util.numberToMoney((player.combineNew.goldCombine - player.inventory.gold)) + " vàng");
-                            } else if (player.combineNew.itemsCombine.size() == 3 && Objects.nonNull(itemDBV) && itemDBV.quantity < player.combineNew.countDaBaoVe) {
-                                this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                        npcSay, "Còn thiếu\n" + (player.combineNew.countDaBaoVe - itemDBV.quantity) + " đá bảo vệ");
-                            } else {
-                                this.baHatMit.createOtherMenu(player, ConstNpc.MENU_START_COMBINE,
-                                        npcSay, "Nâng cấp\n" + Util.numberToMoney(player.combineNew.goldCombine) + " vàng" + daNPC, "Từ chối");
-                            }
-                        } else {
-                            this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Trang bị của ngươi đã đạt cấp tối đa", "Đóng");
-                        }
-                    } else {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Hãy chọn 1 trang bị và 1 loại đá nâng cấp", "Đóng");
-                    }
+                if (player.combineNew.itemsCombine.size() == 1
+                        && player.combineNew.itemsCombine.get(0).isDHD()) {
+                    this.baHatMit.createOtherMenu(player, ConstNpc.MENU_START_COMBINE,
+                            "Đổi 1 món Hủy Diệt thành 1 món SKH cùng loại\n"
+                            + "Set nhận được: ngẫu nhiên\n"
+                            + "Không cần thêm nguyên liệu", "Nâng Cấp", "Từ chối");
                 } else {
-                    if (player.combineNew.itemsCombine.size() > 4) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Cất đi con ta không thèm", "Đóng");
-                        break;
-                    }
-                    this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Hãy chọn 1 trang bị SKH và 1 loại đá nâng cấp", "Đóng");
+                    this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                            "Hãy chọn đúng 1 món đồ Hủy Diệt", "Đóng");
                 }
                 break;
             case TAY_PS_HOA_TRANG_BI:
@@ -1132,38 +1058,21 @@ public class CombineServiceNew {
                     this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Còn thiếu nguyên liệu để nâng cấp hãy quay lại sau", "Đóng");
                 }
                 break;
-            case NANG_CAP_SKH_VIP:
-                if (player.combineNew.itemsCombine.size() == 0) {
-                    this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Hãy đưa ta 1 món thiên sứ và 2 món SKH ngẫu nhiên", "Đóng");
-                    return;
-                }
-                if (player.combineNew.itemsCombine.size() == 3) {
-                    if (player.combineNew.itemsCombine.stream().filter(item -> item.isNotNullItem() && item.isDTS()).count() < 1) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Thiếu đồ thiên sứ", "Đóng");
-                        return;
-                    }
-                    if (player.combineNew.itemsCombine.stream().filter(item -> item.isNotNullItem() && item.isSKH()).count() < 2) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Thiếu đồ kích hoạt ", "Đóng");
-                        return;
-                    }
-
-                    String npcSay = "|2|Con có muốn đổi các món nguyên liệu ?\n|7|"
-                            + "Và nhận được " + player.combineNew.itemsCombine.stream().filter(Item::isDTS).findFirst().get().typeName() + " kích hoạt VIP tương ứng\n"
-                            + "|1|Cần " + Util.numberToMoney(COST) + " vàng";
-
-                    if (player.inventory.gold < COST) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Hết tiền rồi\nẢo ít thôi con", "Đóng");
-                        return;
-                    }
-                    this.baHatMit.createOtherMenu(player, ConstNpc.MENU_NANG_DOI_SKH_VIP,
-                            npcSay, "Nâng cấp\n" + Util.numberToMoney(COST) + " vàng", "Từ chối");
+            case NANG_CAP_SKH_VIP_DHD:
+                if (isValidInputNangCapSKHVIP(player)) {
+                    this.baHatMit.createOtherMenu(player, ConstNpc.MENU_START_COMBINE,
+                            "1 món Hủy Diệt + 3 món Thần Linh khác nhau\n"
+                            + "Kết quả: 1 món SKH VIP cùng loại, phân khúc ngẫu nhiên\n"
+                            + "Tỉ lệ phân khúc: " + getVipTierRateText(player), "Nâng Cấp", "Từ chối");
                 } else {
-                    if (player.combineNew.itemsCombine.size() > 3) {
-                        this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Nguyên liệu không phù hợp", "Đóng");
-                        return;
-                    }
-                    this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, "Còn thiếu nguyên liệu để nâng cấp hãy quay lại sau", "Đóng");
+                    this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                            "Cần 1 món Hủy Diệt và 3 món Thần Linh khác nhau", "Đóng");
                 }
+                break;
+            case NANG_CAP_SKH_TL:
+            case NANG_CAP_SKH_HD:
+            case NANG_CAP_SKH_TS:
+                showInfoNangCapSKH(player, player.combineNew.typeCombine);
                 break;
             case EP_AN_TRANG_BI:
                 if (player.combineNew.itemsCombine.size() == 3) {
@@ -1344,8 +1253,13 @@ public class CombineServiceNew {
             case CHE_TAO_TRANG_BI_TS:
                 cheTaoDoTS(player);
                 break;
-            case NANG_CAP_SKH_VIP:
-                openSKHVIP(player);
+            case NANG_CAP_SKH_VIP_DHD:
+                nangCapSKHVIP(player);
+                break;
+            case NANG_CAP_SKH_TL:
+            case NANG_CAP_SKH_HD:
+            case NANG_CAP_SKH_TS:
+                nangCapSKHTheoCongThuc(player, player.combineNew.typeCombine);
                 break;
             case NANG_CAP_VAT_PHAM:
                 nangCapVatPham(player);
@@ -1382,7 +1296,10 @@ public class CombineServiceNew {
                 phanRaSach(player);
                 break;
             case NANG_CAP_LEVEL_SKH:
-                nangCapLEVELSKH(player);
+                doiDoHuyDietSangSKH(player);
+                break;
+            case NANG_CAP_SKH_VIP:
+                nangCapSKHVIP(player);
                 break;
             case PHAN_RA_DO_THAN_RA_DA_NANG_CAP:
                 phanradothanradanangcap(player);
@@ -1617,6 +1534,228 @@ public class CombineServiceNew {
             Service.gI().sendMoney(player);
             reOpenItemCombine(player);
         }
+    }
+
+    private void doiDoHuyDietSangSKH(Player player) {
+        if (player.combineNew.itemsCombine.size() != 1
+                || !player.combineNew.itemsCombine.get(0).isDHD()) {
+            Service.gI().sendThongBao(player, "Cần đúng 1 món đồ Hủy Diệt");
+            return;
+        }
+        if (InventoryServiceNew.gI().getCountEmptyBag(player) <= 0) {
+            Service.gI().sendThongBao(player, "Bạn phải có ít nhất 1 ô trống hành trang");
+            return;
+        }
+        Item itemHuyDiet = player.combineNew.itemsCombine.get(0);
+        int gender = itemHuyDiet.template.id <= 651 ? 0 : itemHuyDiet.template.id <= 653 ? 1 : 2;
+        int[][] itemIds = {{0, 6, 21, 27, 12}, {1, 7, 22, 28, 12}, {2, 8, 23, 29, 12}};
+        int type = itemHuyDiet.template.type;
+        if (type < 0 || type >= itemIds[gender].length) {
+            Service.gI().sendThongBao(player, "Không xác định được loại trang bị");
+            return;
+        }
+        Item itemSKH = ItemService.gI().itemSKH(itemIds[gender][type], randomSKHIdTheoSet(gender));
+        InventoryServiceNew.gI().subQuantityItemsBag(player, itemHuyDiet, 1);
+        InventoryServiceNew.gI().addItemBag(player, itemSKH);
+        InventoryServiceNew.gI().sendItemBags(player);
+        Service.gI().sendThongBao(player, "Bạn đã nhận được " + itemSKH.template.name);
+    }
+
+    private boolean isValidInputNangCapSKHVIP(Player player) {
+        if (player.combineNew.itemsCombine.size() != 4) {
+            return false;
+        }
+        if (player.combineNew.itemsCombine.stream().filter(Item::isDHD).count() != 1
+                || player.combineNew.itemsCombine.stream().filter(Item::isDTL).count() != 3) {
+            return false;
+        }
+        List<Item> itemTL = player.combineNew.itemsCombine.stream()
+                .filter(Item::isDTL).collect(Collectors.toList());
+        return itemTL.stream().map(item -> item.template.id).distinct().count() == 3;
+    }
+
+    private boolean isValidInputNangCapSKH(Player player, int type) {
+        if (player.combineNew.itemsCombine.size() != 4) {
+            return false;
+        }
+        long dts = player.combineNew.itemsCombine.stream().filter(Item::isDTS).count();
+        long dtl = player.combineNew.itemsCombine.stream().filter(Item::isDTL).count();
+        long dhd = player.combineNew.itemsCombine.stream().filter(Item::isDHD).count();
+        switch (type) {
+            case NANG_CAP_SKH_TL:
+                return dts == 1 && dhd == 3;
+            case NANG_CAP_SKH_HD:
+                return dtl == 1 && dhd == 3
+                        && player.combineNew.itemsCombine.stream().anyMatch(item -> item.isDTL() && item.isSKH());
+            case NANG_CAP_SKH_TS:
+                List<Item> itemDTS = player.combineNew.itemsCombine.stream()
+                        .filter(Item::isDTS).collect(Collectors.toList());
+                return dhd == 1
+                        && itemDTS.size() == 3
+                        && player.combineNew.itemsCombine.stream().anyMatch(item -> item.isDHD() && item.isSKH())
+                        && itemDTS.stream().map(item -> item.template.id).distinct().count() == 3;
+            default:
+                return false;
+        }
+    }
+
+    private void showInfoNangCapSKH(Player player, int type) {
+        if (!isValidInputNangCapSKH(player, type)) {
+            String message = type == NANG_CAP_SKH_TL
+                    ? "Cần 1 món Thiên Sứ và 3 món Hủy Diệt"
+                    : type == NANG_CAP_SKH_HD
+                    ? "Cần 1 món Thần Linh SKH và 3 món Hủy Diệt"
+                    : "Cần 1 món Hủy Diệt SKH và 3 món Thiên Sứ khác nhau";
+            this.baHatMit.createOtherMenu(player, ConstNpc.IGNORE_MENU, message, "Đóng");
+            return;
+        }
+        String result = type == NANG_CAP_SKH_TL ? "Thần Linh SKH"
+                : type == NANG_CAP_SKH_HD ? "Hủy Diệt SKH" : "Thiên Sứ SKH";
+        this.baHatMit.createOtherMenu(player, ConstNpc.MENU_START_COMBINE,
+                "Nguyên liệu hợp lệ\nKết quả: 1 món " + result + " cùng loại\nOption kích hoạt ngẫu nhiên",
+                "Nâng Cấp", "Từ chối");
+    }
+
+    private void nangCapSKHTheoCongThuc(Player player, int type) {
+        if (!isValidInputNangCapSKH(player, type)) {
+            Service.gI().sendThongBao(player, "Nguyên liệu không hợp lệ");
+            return;
+        }
+        if (InventoryServiceNew.gI().getCountEmptyBag(player) <= 0) {
+            Service.gI().sendThongBao(player, "Bạn phải có ít nhất 1 ô trống hành trang");
+            return;
+        }
+        Item source = player.combineNew.itemsCombine.stream()
+                .filter(item -> type == NANG_CAP_SKH_TL ? item.isDTS()
+                        : type == NANG_CAP_SKH_HD ? item.isDTL() && item.isSKH()
+                        : item.isDHD() && item.isSKH())
+                .findFirst().orElse(null);
+        if (source == null) {
+            Service.gI().sendThongBao(player, "Không xác định được trang bị gốc");
+            return;
+        }
+        int gender = source.template.gender == 3 ? 2 : source.template.gender;
+        int itemType = source.template.type;
+        if (gender < 0 || gender >= ITEM_DHD.length || itemType < 0 || itemType > 4) {
+            Service.gI().sendThongBao(player, "Không xác định được loại trang bị");
+            return;
+        }
+        short resultId;
+        if (type == NANG_CAP_SKH_TL) {
+            resultId = itemType == 4 ? Manager.radaSKHVip[6]
+                    : Manager.doSKHVip[gender][itemType][6];
+        } else if (type == NANG_CAP_SKH_HD) {
+            resultId = (short) ITEM_DHD[gender][itemType];
+        } else {
+            resultId = (short) ITEM_DTS[gender][itemType];
+        }
+        Item result = createRandomSKHItem(resultId, gender, type);
+        if (result == null) {
+            Service.gI().sendThongBao(player, "Không tạo được trang bị kết quả");
+            return;
+        }
+        sendEffectSuccessCombine(player);
+        player.combineNew.itemsCombine.forEach(item -> InventoryServiceNew.gI().subQuantityItemsBag(player, item, 1));
+        InventoryServiceNew.gI().addItemBag(player, result);
+        InventoryServiceNew.gI().sendItemBags(player);
+        Service.gI().sendThongBao(player, "Bạn nhận được " + result.template.name + " SKH");
+        player.combineNew.itemsCombine.clear();
+        reOpenItemCombine(player);
+    }
+
+    private Item createRandomSKHItem(short itemId, int gender, int type) {
+        int skhId = ItemService.gI().randomSKHId((byte) gender);
+        Item item;
+        if (new Item(itemId).isDTL()) {
+            item = Util.ratiItemTL(itemId);
+            item.itemOptions.removeIf(option -> option.optionTemplate.id == 21);
+            item.itemOptions.add(new Item.ItemOption(skhId, 2));
+            item.itemOptions.add(new Item.ItemOption(ItemService.gI().optionIdSKH(skhId),
+                    ItemService.gI().skhOptionParam(ItemService.gI().optionIdSKH(skhId))));
+            item.itemOptions.add(new Item.ItemOption(21, 15));
+            item.itemOptions.add(new Item.ItemOption(30, 1));
+        } else if (new Item(itemId).isDHD()) {
+            item = ItemService.gI().randomCS_DHD(itemId, gender);
+            item.itemOptions.add(new Item.ItemOption(skhId, 2));
+            item.itemOptions.add(new Item.ItemOption(ItemService.gI().optionIdSKH(skhId),
+                    ItemService.gI().skhOptionParam(ItemService.gI().optionIdSKH(skhId))));
+        } else {
+            item = ItemService.gI().itemSKH(itemId, skhId);
+        }
+        return item;
+    }
+
+    private int randomSKHIdTheoSet(int gender) {
+        int safeGender = Math.max(0, Math.min(gender, TY_LE_SET_SKH.length - 1));
+        int[] ratios = TY_LE_SET_SKH[safeGender];
+        int value = Util.nextInt(1, Arrays.stream(ratios).sum());
+        int accumulated = 0;
+        int[][] options = {{128, 129, 127}, {130, 131, 132}, {133, 135, 134}};
+        for (int set = 0; set < ratios.length; set++) {
+            accumulated += ratios[set];
+            if (value <= accumulated) {
+                return options[safeGender][set];
+            }
+        }
+        return options[safeGender][options[safeGender].length - 1];
+    }
+
+    private int randomPhanKhucSKHVIP(int gender, int type) {
+        int safeGender = Math.max(0, Math.min(gender, TY_LE_PHAN_KHUC_SKH_VIP.length - 1));
+        int safeType = Math.max(0, Math.min(type, TY_LE_PHAN_KHUC_SKH_VIP[safeGender].length - 1));
+        int[] ratios = TY_LE_PHAN_KHUC_SKH_VIP[safeGender][safeType];
+        int total = Arrays.stream(ratios).sum();
+        int value = Util.nextInt(1, total);
+        int accumulated = 0;
+        for (int i = 0; i < ratios.length; i++) {
+            accumulated += ratios[i];
+            if (value <= accumulated) {
+                return i;
+            }
+        }
+        return ratios.length - 1;
+    }
+
+    private String getVipTierRateText(Player player) {
+        Item item = player.combineNew.itemsCombine.stream().filter(Item::isDHD).findFirst().orElse(null);
+        if (item == null) {
+            return "70% / 25% / 5%";
+        }
+        int gender = item.template.gender == 3 ? 2 : item.template.gender;
+        int type = Math.max(0, Math.min(item.template.type, TY_LE_PHAN_KHUC_SKH_VIP[0].length - 1));
+        int[] ratios = TY_LE_PHAN_KHUC_SKH_VIP[Math.max(0, Math.min(gender, 2))][type];
+        return ratios[0] + "% / " + ratios[1] + "% / " + ratios[2] + "%";
+    }
+
+    private void nangCapSKHVIP(Player player) {
+        if (!isValidInputNangCapSKHVIP(player)) {
+            Service.gI().sendThongBao(player, "Cần 1 món Hủy Diệt và 3 món Thần Linh khác nhau");
+            return;
+        }
+        if (InventoryServiceNew.gI().getCountEmptyBag(player) <= 0) {
+            Service.gI().sendThongBao(player, "Bạn phải có ít nhất 1 ô trống hành trang");
+            return;
+        }
+        Item itemHuyDiet = player.combineNew.itemsCombine.stream().filter(Item::isDHD).findFirst().get();
+        int gender = itemHuyDiet.template.gender == 3 ? 2 : itemHuyDiet.template.gender;
+        int type = itemHuyDiet.template.type;
+        int tier = randomPhanKhucSKHVIP(gender, type);
+        short itemId;
+        if (type == 4) {
+            itemId = Manager.radaSKHVip[Math.min(tier + 3, Manager.radaSKHVip.length - 1)];
+        } else if (gender >= 0 && gender < Manager.doSKHVip.length && type >= 0 && type < Manager.doSKHVip[gender].length) {
+            short[] tierItems = Manager.doSKHVip[gender][type];
+            int index = tier == 0 ? Util.nextInt(0, 2) : tier == 1 ? Util.nextInt(3, 4) : 5;
+            itemId = tierItems[Math.min(index, tierItems.length - 1)];
+        } else {
+            Service.gI().sendThongBao(player, "Không xác định được phân khúc trang bị");
+            return;
+        }
+        Item itemSKH = ItemService.gI().itemSKH(itemId, ItemService.gI().randomSKHId((byte) gender));
+        player.combineNew.itemsCombine.forEach(item -> InventoryServiceNew.gI().subQuantityItemsBag(player, item, 1));
+        InventoryServiceNew.gI().addItemBag(player, itemSKH);
+        InventoryServiceNew.gI().sendItemBags(player);
+        Service.gI().sendThongBao(player, "Bạn đã nhận được " + itemSKH.template.name + " SKH VIP");
     }
 
     private void nangCapLEVELSKH(Player player) {
@@ -2490,8 +2629,9 @@ public class CombineServiceNew {
             Item item;
             if (new Item(itemId).isDTL()) {
                 item = Util.ratiItemTL(itemId);
-                item.itemOptions.add(new Item.ItemOption(skhId, 1));
-                item.itemOptions.add(new Item.ItemOption(ItemService.gI().optionIdSKH(skhId), 1));
+                item.itemOptions.add(new Item.ItemOption(skhId, 2));
+                int optionId = ItemService.gI().optionIdSKH(skhId);
+                item.itemOptions.add(new Item.ItemOption(optionId, ItemService.gI().skhOptionParam(optionId)));
                 item.itemOptions.remove(item.itemOptions.stream().filter(itemOption -> itemOption.optionTemplate.id == 21).findFirst().get());
                 item.itemOptions.add(new Item.ItemOption(21, 15));
                 item.itemOptions.add(new Item.ItemOption(30, 1));
@@ -4382,6 +4522,14 @@ public class CombineServiceNew {
                 return "Ta sẽ nâng cấp \n  trang bị của người thành\n đồ thiên sứ!";
             case NANG_CAP_SKH_VIP:
                 return "Thiên sứ nhờ ta nâng cấp \n  trang bị của người thành\n SKH VIP!";
+            case NANG_CAP_SKH_VIP_DHD:
+                return "Hủy diệt và Thần Linh nhờ ta nâng cấp\ntrang bị thành SKH VIP cao cấp!";
+            case NANG_CAP_SKH_TL:
+                return "Thiên Sứ và Hủy Diệt nhờ ta nâng cấp\ntrang bị thành Thần Linh SKH!";
+            case NANG_CAP_SKH_HD:
+                return "Thần Linh SKH và Hủy Diệt nhờ ta nâng cấp\ntrang bị thành Hủy Diệt SKH!";
+            case NANG_CAP_SKH_TS:
+                return "Hủy Diệt SKH và Thiên Sứ nhờ ta nâng cấp\ntrang bị thành Thiên Sứ SKH!";
             case NANG_CAP_BONG_TAI:
                 return "Ta sẽ phù phép\ncho bông tai Porata của ngươi\ntiến hóa thêm 1 cấp";
             case MO_CHI_SO_BONG_TAI:
@@ -4453,10 +4601,22 @@ public class CombineServiceNew {
                         + "Nếu cho thêm thỏi vàng vào sẽ giúp giảm số lượng Đá Chân Mệnh và tăng thêm tỉ lệ\n\n"
                         + "Lưu ý: Khi Nâng cấp Thành công sẽ tăng thêm % chỉ số của cấp trước đó";
             case NANG_CAP_LEVEL_SKH:
-                return "Ta sẽ nâng cấp SKH của người lên cấp 2 ( Thứ tự : Đá cường hóa , đồ tl , skh cấp 1 )"
-                        + "\nYêu cầu 1 món thần linh bất kì"
-                        + "\nYêu cầu 5 đá cường hóa để nâng cấp 2 ( Mỗi level tăng 20% chỉ số của SKH)"
-                        + "\nChỉ cần chọn 'Nâng Cấp'";
+                return "Đổi 1 món Hủy Diệt thành 1 món SKH cùng loại"
+                    + "\nSet SKH nhận được là ngẫu nhiên"
+                    + "\nChỉ cần chọn 'Nâng Cấp'";
+            case NANG_CAP_SKH_VIP_DHD:
+                return "Chọn 1 món Hủy Diệt và 3 món Thần Linh khác nhau"
+                    + "\nKết quả cùng loại, ở phân khúc cao hơn"
+                    + "\nTỷ lệ từng phân khúc được cấu hình riêng theo set";
+            case NANG_CAP_SKH_TL:
+                return "Chọn 1 món Thiên Sứ và 3 món Hủy Diệt"
+                    + "\nKết quả: 1 món Thần Linh SKH cùng loại";
+            case NANG_CAP_SKH_HD:
+                return "Chọn 1 món Thần Linh SKH và 3 món Hủy Diệt"
+                    + "\nKết quả: 1 món Hủy Diệt SKH cùng loại";
+            case NANG_CAP_SKH_TS:
+                return "Chọn 1 món Hủy Diệt SKH và 3 món Thiên Sứ khác nhau"
+                    + "\nKết quả: 1 món Thiên Sứ SKH cùng loại";
             case CHE_TAO_TRANG_BI_TS:
                 return "Cần 1 công thức vip\nMảnh trang bị tương ứng\n"
                         + "Số Lượng\n999"

@@ -5070,6 +5070,7 @@ namespace Game6
 		// Token: 0x06000319 RID: 793 RVA: 0x00040608 File Offset: 0x0003E808
 		public static void startFlyText(string flyString, int x, int y, int dx, int dy, int color)
 		{
+			flyString = formatFlyNumber(flyString);
 			int num = -1;
 			for (int i = 0; i < 5; i++)
 			{
@@ -5099,6 +5100,37 @@ namespace Game6
 					GameScr.flyTextYTo[num] += 10;
 				}
 			}
+		}
+
+		private static string formatFlyNumber(string flyString)
+		{
+			if (string.IsNullOrEmpty(flyString) || flyString.Length < 2
+				|| (flyString[0] != '+' && flyString[0] != '-'))
+			{
+				return flyString;
+			}
+			int numberEnd = 1;
+			while (numberEnd < flyString.Length && flyString[numberEnd] >= '0' && flyString[numberEnd] <= '9')
+			{
+				numberEnd++;
+			}
+			int numberLength = numberEnd - 1;
+			if (numberLength <= 3)
+			{
+				return flyString;
+			}
+			string number = flyString.Substring(1, numberLength);
+			int firstGroupLength = numberLength % 3;
+			if (firstGroupLength == 0)
+			{
+				firstGroupLength = 3;
+			}
+			string grouped = number.Substring(0, firstGroupLength);
+			for (int index = firstGroupLength; index < numberLength; index += 3)
+			{
+				grouped += "." + number.Substring(index, 3);
+			}
+			return flyString[0] + grouped + flyString.Substring(numberEnd);
 		}
 
 		// Token: 0x0600031A RID: 794 RVA: 0x000406E8 File Offset: 0x0003E8E8

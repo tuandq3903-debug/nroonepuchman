@@ -464,6 +464,7 @@ public class EffectSkillService {
             player.effectSkill.isTranformation = true;
             player.effectSkill.timeTranformation = timeTranformation;
             player.effectSkill.levelTranformation = (byte) player.playerSkill.skillSelect.point;
+            player.nPoint.calPoint();
             Service.getInstance().sendSpeedPlayer(player, 6);
             sendEffectTranformation(player);
             Service.getInstance().Send_Caitrang(player);
@@ -503,6 +504,7 @@ public class EffectSkillService {
             player.effectSkill.isEvolution = true;
             player.effectSkill.timeEvolution = timeTranformation;
             player.effectSkill.lastTimeEvolution = System.currentTimeMillis();
+            player.nPoint.calPoint();
             EffectSkillService.gI().sendEffectVolution(player);
             Service.getInstance().Send_Caitrang(player);
             switch (player.gender) {
@@ -579,6 +581,7 @@ public class EffectSkillService {
         PlayerDAO.saveisBienHinh(player);
         player.effectSkill.isTranformation = false;
         player.effectSkill.levelTranformation = 0;
+        player.nPoint.calPoint();
         if (player.nPoint.hp > player.nPoint.hpMax) {
             player.nPoint.setHp(player.nPoint.hpMax);
         }
@@ -596,6 +599,7 @@ public class EffectSkillService {
         player.isbienhinh = 0;
         PlayerDAO.saveisBienHinh(player);
         player.effectSkill.isEvolution = false;
+        player.nPoint.calPoint();
         if (player.nPoint.hp > player.nPoint.hpMax) {
             player.nPoint.setHp(player.nPoint.hpMax);
         }

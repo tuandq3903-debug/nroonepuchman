@@ -139,7 +139,12 @@ public class Item {
         }
 
         public String getOptionString() {
-            return Util.replace(this.optionTemplate.name, "#", String.valueOf(this.param));
+            String optionName = this.optionTemplate.name;
+            if (this.param > 0 && this.optionTemplate.id >= 136 && this.optionTemplate.id <= 144
+                    && !optionName.contains("#")) {
+                return optionName + " +" + this.param + "%";
+            }
+            return Util.replace(optionName, "#", String.valueOf(this.param));
         }
 
         public void dispose() {

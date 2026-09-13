@@ -27,6 +27,7 @@ import java.util.List;
 public class NPoint {
 
     public static final byte MAX_LIMIT = 6;
+    private static final int[] BIEN_HINH_PERCENT = {10, 20, 30, 40, 50, 60};
 
     private Player player;
 
@@ -663,9 +664,7 @@ public class NPoint {
             this.hpMax += this.hpMax * 5 / 100;
         }
         //set nappa
-        if (this.player.setClothes.nappa == 5 && this.player.setClothes.level == 1) {
-            this.hpMax += calPercent(this.hpMax, 80);
-        } else if (this.player.setClothes.nappa == 5 && this.player.setClothes.level == 2) {
+        if (this.player.setClothes.nappa == 5) {
             this.hpMax += calPercent(this.hpMax, 100);
         }
         //set worldcup
@@ -789,6 +788,7 @@ public class NPoint {
         if (this.player.itemTime != null && this.player.itemTime.istrbhp) {
             this.hpMax += (this.mpMax * 30 / 100);
         }
+        this.hpMax += this.hpMax * getBienHinhPercent() / 100;
     }
 
     // (hp sư phụ + hp đệ tử ) + 15%
@@ -815,9 +815,7 @@ public class NPoint {
         if (this.player.itemTime != null && this.player.itemTime.isthapCam) {
             this.mpMax += this.mpMax * 5 / 100;
         }
-        if (this.player.setClothes.picolo == 5 && this.player.setClothes.level == 1) {
-            this.mpMax += calPercent(this.mpMax, 80);
-        } else if (this.player.setClothes.picolo == 5 && this.player.setClothes.level == 2) {
+        if (this.player.setClothes.picolo == 5) {
             this.mpMax += calPercent(this.mpMax, 100);
         }
         //ngọc rồng đen 3 sao
@@ -921,6 +919,7 @@ public class NPoint {
         if (this.player.itemTime != null && this.player.itemTime.istrbki) {
             this.mpMax += (this.mpMax * 30 / 100);
         }
+        this.mpMax += this.mpMax * getBienHinhPercent() / 100;
     }
 
     private void setMp() {
@@ -1070,6 +1069,19 @@ public class NPoint {
         if (this.player.itemTime != null && this.player.itemTime.istrbsd) {
             this.dame += (this.dame * 30 / 100);
         }
+        this.dame += this.dame * getBienHinhPercent() / 100;
+    }
+
+    private int getBienHinhPercent() {
+        if (this.player.effectSkill == null
+                || (!this.player.effectSkill.isTranformation && !this.player.effectSkill.isEvolution)) {
+            return 0;
+        }
+        int level = this.player.effectSkill.isEvolution
+                ? this.player.isbienhinh + 1
+                : 1;
+        int index = Math.max(0, Math.min(level, BIEN_HINH_PERCENT.length) - 1);
+        return BIEN_HINH_PERCENT[index];
     }
 
     private void setDef() {
@@ -1223,9 +1235,7 @@ public class NPoint {
                     percentDameIntrinsic = intrinsic.param1;
                 }
                 percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.songoku == 5 && this.player.setClothes.level == 1) {
-                    percentXDame = 80;
-                } else if (this.player.setClothes.songoku == 5 && this.player.setClothes.level == 2) {
+                if (this.player.setClothes.songoku == 5) {
                     percentXDame = 100;
                 }
                 break;
@@ -1234,9 +1244,7 @@ public class NPoint {
                     percentDameIntrinsic = intrinsic.param1;
                 }
                 percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.kakarot == 5 && this.player.setClothes.level == 1) {
-                    percentXDame = 80;
-                } else if (this.player.setClothes.kakarot == 5 && this.player.setClothes.level == 2) {
+                if (this.player.setClothes.kakarot == 5) {
                     percentXDame = 100;
                 }
                 break;
@@ -1263,9 +1271,7 @@ public class NPoint {
                     percentDameIntrinsic = intrinsic.param1;
                 }
                 percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.kirin == 5 && this.player.setClothes.level == 1) {
-                    percentXDame = 80;
-                } else if (this.player.setClothes.kirin == 5 && this.player.setClothes.level == 2) {
+                if (this.player.setClothes.kirin == 5) {
                     percentXDame = 100;
                 }
                 break;
@@ -1274,9 +1280,7 @@ public class NPoint {
                     percentDameIntrinsic = intrinsic.param1;
                 }
                 percentDameSkill = skillSelect.damage;
-                if (this.player.setClothes.ocTieu == 5 && this.player.setClothes.level == 1) {
-                    percentXDame = 80;
-                }else if (this.player.setClothes.ocTieu == 5 && this.player.setClothes.level == 2) {
+                if (this.player.setClothes.ocTieu == 5) {
                     percentXDame = 100;
                 }
                 break;

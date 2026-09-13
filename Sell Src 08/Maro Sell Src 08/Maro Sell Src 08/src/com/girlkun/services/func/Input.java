@@ -248,25 +248,25 @@ public class Input {
                                 Service.getInstance().sendMoney(player);
                             } else {
                                 Item itemBuffTemplate = ItemService.gI().createNewItem((short) idItemBuff);
-                                itemBuffTemplate.itemOptions.add(new Item.ItemOption(idOptionSKH, 0));
+                                itemBuffTemplate.itemOptions.add(new Item.ItemOption(idOptionSKH, 2));
                                 if (idOptionSKH == 127) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(139, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(139, 2));
                                 } else if (idOptionSKH == 128) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(140, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(140, 100));
                                 } else if (idOptionSKH == 129) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(141, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(141, 100));
                                 } else if (idOptionSKH == 130) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(142, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(142, 100));
                                 } else if (idOptionSKH == 131) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(143, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(143, 100));
                                 } else if (idOptionSKH == 132) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(144, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(144, 100));
                                 } else if (idOptionSKH == 133) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(136, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(136, 100));
                                 } else if (idOptionSKH == 134) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(137, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(137, 2));
                                 } else if (idOptionSKH == 135) {
-                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(138, 0));
+                                    itemBuffTemplate.itemOptions.add(new Item.ItemOption(138, 100));
                                 }
                                 itemBuffTemplate.itemOptions.add(new Item.ItemOption(30, 0));
                                 itemBuffTemplate.itemOptions.add(new Item.ItemOption(idOptionBuff, slOptionBuff));

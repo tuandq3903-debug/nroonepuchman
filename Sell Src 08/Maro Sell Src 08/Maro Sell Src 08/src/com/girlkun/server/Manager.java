@@ -737,15 +737,15 @@ public class Manager {
             rs = ps.executeQuery();
             while (rs.next()) {
                 MobTemplate mobTemp = new MobTemplate();
-                mobTemp.id = rs.getByte("id");
-                mobTemp.type = rs.getByte("type");
+                mobTemp.id = rs.getInt("id");
+                mobTemp.type = toByteValue(rs.getInt("type"));
                 mobTemp.name = rs.getString("name");
                 mobTemp.hp = rs.getInt("hp");
-                mobTemp.rangeMove = rs.getByte("range_move");
-                mobTemp.speed = rs.getByte("speed");
-                mobTemp.dartType = rs.getByte("dart_type");
-                mobTemp.percentDame = rs.getByte("percent_dame");
-                mobTemp.percentTiemNang = rs.getByte("percent_tiem_nang");
+                mobTemp.rangeMove = toByteValue(rs.getInt("range_move"));
+                mobTemp.speed = toByteValue(rs.getInt("speed"));
+                mobTemp.dartType = toByteValue(rs.getInt("dart_type"));
+                mobTemp.percentDame = toByteValue(rs.getInt("percent_dame"));
+                mobTemp.percentTiemNang = toByteValue(rs.getInt("percent_tiem_nang"));
                 MOB_TEMPLATES.add(mobTemp);
             }
             Logger.success("Load mob template thành công [" + MOB_TEMPLATES.size() + "]\n");
@@ -1124,6 +1124,10 @@ public class Manager {
             }
         }
         return null;
+    }
+
+    private static byte toByteValue(int value) {
+        return (byte) Math.max(Byte.MIN_VALUE, Math.min(Byte.MAX_VALUE, value));
     }
 
     public static byte getNFrameImageByName(String name) {
