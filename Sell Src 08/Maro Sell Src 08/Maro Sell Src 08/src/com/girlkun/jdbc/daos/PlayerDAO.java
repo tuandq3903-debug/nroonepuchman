@@ -403,7 +403,7 @@ public class PlayerDAO {
 
                 //data body
                 JSONArray dataItem = new JSONArray();
-                for (Item item : player.inventory.itemsBody) {
+                for (Item item : new ArrayList<>(player.inventory.itemsBody)) {
                     JSONArray opt = new JSONArray();
                     if (item.isNotNullItem()) {
                         dataItem.add(item.template.id);
@@ -429,7 +429,7 @@ public class PlayerDAO {
                 dataArray.clear();
 
                 //data bag
-                for (Item item : player.inventory.itemsBag) {
+                for (Item item : new ArrayList<>(player.inventory.itemsBag)) {
                     JSONArray opt = new JSONArray();
                     if (item.isNotNullItem()) {
                         dataItem.add(item.template.id);
@@ -456,7 +456,7 @@ public class PlayerDAO {
 
                 //data card
                 //data box
-                for (Item item : player.inventory.itemsBox) {
+                for (Item item : new ArrayList<>(player.inventory.itemsBox)) {
                     JSONArray opt = new JSONArray();
                     if (item.isNotNullItem()) {
                         dataItem.add(item.template.id);
@@ -466,7 +466,6 @@ public class PlayerDAO {
                             opt.add(io.optionTemplate.id);
                             opt.add(io.param);
                             options.add(opt.toJSONString());
-                            opt.clear();
                         }
                         dataItem.add(options.toJSONString());
                     } else {
@@ -482,7 +481,7 @@ public class PlayerDAO {
                 dataArray.clear();
 
                 //data box crack ball
-                for (Item item : player.inventory.itemsBoxCrackBall) {
+                for (Item item : new ArrayList<>(player.inventory.itemsBoxCrackBall)) {
                     JSONArray opt = new JSONArray();
                     if (item.isNotNullItem()) {
                         dataItem.add(item.template.id);
@@ -492,7 +491,6 @@ public class PlayerDAO {
                             opt.add(io.optionTemplate.id);
                             opt.add(io.param);
                             options.add(opt.toJSONString());
-                            opt.clear();
                         }
                         dataItem.add(options.toJSONString());
                     } else {
@@ -509,7 +507,7 @@ public class PlayerDAO {
 
                 //data bạn bè
                 JSONArray dataFE = new JSONArray();
-                for (Friend f : player.friends) {
+                for (Friend f : new ArrayList<>(player.friends)) {
                     dataFE.add(f.id);
                     dataFE.add(f.name);
                     dataFE.add(f.head);
@@ -524,7 +522,7 @@ public class PlayerDAO {
                 dataArray.clear();
 
                 //data kẻ thù
-                for (Friend e : player.enemies) {
+                for (Friend e : new ArrayList<>(player.enemies)) {
                     dataFE.add(e.id);
                     dataFE.add(e.name);
                     dataFE.add(e.head);
@@ -640,7 +638,7 @@ public class PlayerDAO {
 
                 //data skill
                 JSONArray dataSkill = new JSONArray();
-                for (Skill skill : player.playerSkill.skills) {
+                for (Skill skill : new ArrayList<>(player.playerSkill.skills)) {
                     dataSkill.add(skill.template.id);
                     dataSkill.add(skill.point);
                     dataSkill.add(skill.lastTimeUseThisSkill);
@@ -695,7 +693,7 @@ public class PlayerDAO {
                     JSONArray items = new JSONArray();
                     JSONArray options = new JSONArray();
                     JSONArray opt = new JSONArray();
-                    for (Item item : player.pet.inventory.itemsBody) {
+                    for (Item item : new ArrayList<>(player.pet.inventory.itemsBody)) {
                         if (item.isNotNullItem()) {
                             dataItem.add(item.template.id);
                             dataItem.add(item.quantity);
@@ -721,7 +719,7 @@ public class PlayerDAO {
                     petBody = items.toJSONString();
 
                     JSONArray petSkills = new JSONArray();
-                    for (Skill s : player.pet.playerSkill.skills) {
+                    for (Skill s : new ArrayList<>(player.pet.playerSkill.skills)) {
                         JSONArray pskill = new JSONArray();
                         if (s.skillId != -1) {
                             pskill.add(s.template.id);

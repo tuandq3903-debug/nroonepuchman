@@ -375,6 +375,9 @@ public class GodGK {
 
                             //data body
                             dataArray = (JSONArray) jv.parse(rs.getString("items_body"));
+                            if (dataArray == null) {
+                                dataArray = new JSONArray();
+                            }
                             for (int i = 0; i < dataArray.size(); i++) {
                                 Item item = null;
                                 JSONArray dataItem = (JSONArray) jv.parse(dataArray.get(i).toString());
@@ -396,13 +399,16 @@ public class GodGK {
                                 }
                                 player.inventory.itemsBody.add(item);
                             }
-                            if (player.inventory.itemsBody.size() == 12) {
+                            while (player.inventory.itemsBody.size() < 13) {
                                 player.inventory.itemsBody.add(ItemService.gI().createItemNull());
                             }
                             dataArray.clear();
 
                             //data bag
                             dataArray = (JSONArray) jv.parse(rs.getString("items_bag"));
+                            if (dataArray == null) {
+                                dataArray = new JSONArray();
+                            }
                             for (int i = 0; i < dataArray.size(); i++) {
                                 Item item = null;
                                 JSONArray dataItem = (JSONArray) jv.parse(dataArray.get(i).toString());

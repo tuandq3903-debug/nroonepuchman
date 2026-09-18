@@ -1224,45 +1224,49 @@ public class SkillService {
         hutHPMP(plAtt, dameHit, false);
         Message msg;
         try {
-            for (Player plMap : plAtt.zone.getPlayers()) {
-                msg = new Message(-60);
-                msg.writer().writeInt((int) plAtt.id); //id pem
-                msg.writer().writeByte(plAtt.playerSkill.skillSelect.skillId); //skill pem
-                msg.writer().writeByte(1); //sá»‘ ngÆ°á»i pem
-                msg.writer().writeInt((int) plInjure.id); //id Äƒn pem
-                byte typeSkill = SkillUtil.getTyleSkillAttack(plAtt.playerSkill.skillSelect);
-                msg.writer().writeByte(typeSkill == 2 ? 0 : 1); //read continue
-                msg.writer().writeByte(typeSkill); //type skill
-                if (plMap.getSession() != null && plMap.getSession().version == 999) {
-                    msg.writer().writeLong(dameHit); //dame pem
-                } else {
-                    if (dameHit > Integer.MAX_VALUE && !plInjure.isDie()) {
-                        Service.gI().chatJustForMe(plAtt, plInjure, plAtt.nPoint.isCrit ? "|7|-" + Util.format(dameHit) : Util.format(dameHit));
-                    } else {
-                        msg.writer().writeInt(Util.fromLongtoInt(dameHit)); //dame ăn
+            byte typeSkill = SkillUtil.getTyleSkillAttack(plAtt.playerSkill.skillSelect);
+            msg = new Message(-60);
+            msg.writer().writeInt((int) plAtt.id); //id pem
+            msg.writer().writeByte(plAtt.playerSkill.skillSelect.skillId); //skill pem
+            msg.writer().writeByte(1); //số người pem
+            msg.writer().writeInt((int) plInjure.id); //id ăn pem
+            msg.writer().writeByte(typeSkill == 2 ? 0 : 1); //read continue
+            msg.writer().writeByte(typeSkill); //type skill
+            if (plInjure.getSession() != null && plInjure.getSession().version == 999) {
+                msg.writer().writeLong(dameHit);
+            } else {
+                msg.writer().writeInt(Util.fromLongtoInt(dameHit));
+            }
+            msg.writer().writeBoolean(plInjure.isDie()); //is die
+            msg.writer().writeBoolean(plAtt.nPoint.isCrit); //crit
+            if (typeSkill != 1) {
+                Service.gI().sendMessAllPlayerInMap(plAtt, msg);
+            } else {
+                msg.cleanup();
+                for (Player recipient : plAtt.zone.getPlayers()) {
+                    if (recipient == null) {
+                        continue;
                     }
+                    Message beamMsg = new Message(-60);
+                    beamMsg.writer().writeInt((int) plAtt.id);
+                    beamMsg.writer().writeByte(plAtt.playerSkill.skillSelect.skillId);
+                    beamMsg.writer().writeByte(1);
+                    beamMsg.writer().writeInt((int) plInjure.id);
+                    beamMsg.writer().writeByte(1);
+                    beamMsg.writer().writeByte(0); // client applies damage
+                    if (recipient.getSession() != null && recipient.getSession().version == 999) {
+                        beamMsg.writer().writeLong(dameHit);
+                    } else {
+                        beamMsg.writer().writeInt(Util.fromLongtoInt(dameHit));
+                    }
+                    beamMsg.writer().writeBoolean(plInjure.isDie());
+                    beamMsg.writer().writeBoolean(plAtt.nPoint.isCrit);
+                    recipient.sendMessage(beamMsg);
+                    beamMsg.cleanup();
                 }
-                msg.writer().writeBoolean(plInjure.isDie()); //is die
-                msg.writer().writeBoolean(plAtt.nPoint.isCrit); //crit
-                if (typeSkill != 1) {
-                    Service.gI().sendMessAllPlayerInMap(plAtt, msg);
-                    msg.cleanup();
-                } else {
-                    plInjure.sendMessage(msg);
-                    msg.cleanup();
-                    msg = new Message(-60);
-                    msg.writer().writeInt((int) plAtt.id); //id pem
-                    msg.writer().writeByte(plAtt.playerSkill.skillSelect.skillId); //skill pem
-                    msg.writer().writeByte(1); //sá»‘ ngÆ°á»i pem
-                    msg.writer().writeInt((int) plInjure.id); //id Äƒn pem
-                    msg.writer().writeByte(typeSkill == 2 ? 0 : 1); //read continue
-                    msg.writer().writeByte(0); //type skill
-                    msg.writer().writeLong(dameHit); //dame Äƒn
-                    msg.writer().writeBoolean(plInjure.isDie()); //is die
-                    msg.writer().writeBoolean(plAtt.nPoint.isCrit); //crit
-                    Service.gI().sendMessAnotherNotMeInMap(plInjure, msg);
-                    msg.cleanup();
-                }
+            }
+            if (typeSkill != 1) {
+                msg.cleanup();
             }
             Service.gI().addSMTN(plInjure, (byte) 2, 1, false);
         } catch (Exception e) {

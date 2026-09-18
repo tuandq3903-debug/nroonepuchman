@@ -183,7 +183,7 @@ public class Service {
             msg.dispose();
             return;
         }
-        List<Player> players = zone.getPlayers();
+        List<Player> players = new ArrayList<>(zone.getPlayers());
         if (players.isEmpty()) {
             msg.dispose();
             return;
@@ -208,7 +208,7 @@ public class Service {
                 player.sendMessage(msg);
             }
         } else {
-            List<Player> players = player.zone.getPlayers();
+            List<Player> players = new ArrayList<>(player.zone.getPlayers());
             if (players.isEmpty()) {
                 msg.dispose();
                 return;

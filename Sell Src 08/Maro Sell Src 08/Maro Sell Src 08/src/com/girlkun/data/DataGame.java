@@ -30,11 +30,11 @@ import java.util.List;
 
 public class DataGame {
 
-    public static byte vsData = 80;
+    public static byte vsData = 81;
     public static byte vsMap = 80;
     public static byte vsSkill = 6;
-    public static byte vsItem = 80;
-    public static int vsRes = 752011;
+    public static byte vsItem = 97;
+    public static int vsRes = 752012;
 
     public static String LINK_IP_PORT = "Arriety:sv.arriety.com:14445:0";
     private static final String MOUNT_NUM = "733:1,734:2,735:3,743:4,744:5,746:6,795:7,849:8,897:9,920:10,1143:11,1141:15,1203:56,1204:58,1205:57,1206:55,1254:43,1255:44,1256:45";
@@ -339,6 +339,7 @@ public class DataGame {
             session.sendMessage(msg);
             msg.cleanup();
         } catch (Exception e) {
+            Logger.logException(DataGame.class, e);
         }
     }
 

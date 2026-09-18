@@ -220,6 +220,27 @@ public class Manager {
                 parts.add(part);
                 dataArray.clear();
             }
+            parts.sort((left, right) -> Integer.compare(left.id, right.id));
+            List<Part> normalizedParts = new ArrayList<>();
+            for (int partId = 0; partId <= parts.get(parts.size() - 1).id; partId++) {
+                final int currentPartId = partId;
+                Part currentPart = parts.stream()
+                    .filter(part -> part.id == currentPartId)
+                        .findFirst()
+                        .orElse(null);
+                if (currentPart != null) {
+                    normalizedParts.add(currentPart);
+                } else {
+                    Part emptyPart = new Part();
+                    emptyPart.id = partId;
+                    emptyPart.type = 0;
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    normalizedParts.add(emptyPart);
+                }
+            }
+            parts = normalizedParts;
             DataOutputStream dos = new DataOutputStream(new FileOutputStream("data/girlkun/update_data/part"));
             dos.writeShort(parts.size());
             for (Part part : parts) {
@@ -265,6 +286,27 @@ public class Manager {
                 parts.add(part);
                 dataArray.clear();
             }
+            parts.sort((left, right) -> Integer.compare(left.id, right.id));
+            List<Part> normalizedParts = new ArrayList<>();
+            for (int partId = 0; partId <= parts.get(parts.size() - 1).id; partId++) {
+                final int currentPartId = partId;
+                Part currentPart = parts.stream()
+                    .filter(part -> part.id == currentPartId)
+                        .findFirst()
+                        .orElse(null);
+                if (currentPart != null) {
+                    normalizedParts.add(currentPart);
+                } else {
+                    Part emptyPart = new Part();
+                    emptyPart.id = partId;
+                    emptyPart.type = 0;
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    emptyPart.partDetails.add(new PartDetail((short) 0, (byte) 0, (byte) 0));
+                    normalizedParts.add(emptyPart);
+                }
+            }
+            parts = normalizedParts;
             DataOutputStream dos = new DataOutputStream(new FileOutputStream("data/girlkun/update_data/part"));
             dos.writeShort(parts.size());
             for (Part part : parts) {

@@ -79,6 +79,10 @@ namespace Game1
 		// Token: 0x06003841 RID: 14401 RVA: 0x0036F6C8 File Offset: 0x0036D8C8
 		public static void createImage(int id)
 		{
+			if (id < 0 || SmallImage.imgNew == null || id >= SmallImage.imgNew.Length)
+			{
+				return;
+			}
 			if (mGraphics.zoomLevel == 1)
 			{
 				Image image = GameCanvas.loadImage("/SmallImage/Small" + id.ToString() + ".png");
@@ -129,11 +133,15 @@ namespace Game1
 		// Token: 0x06003842 RID: 14402 RVA: 0x0036F7B0 File Offset: 0x0036D9B0
 		public static void drawSmallImage(mGraphics g, int id, int x, int y, int transform, int anchor)
 		{
+			if (id < 0 || SmallImage.imgNew == null || id >= SmallImage.imgNew.Length)
+			{
+				return;
+			}
 			if (SmallImage.imgbig != null)
 			{
 				if (SmallImage.smallImg != null)
 				{
-					if (id >= SmallImage.smallImg.Length || SmallImage.smallImg[id][1] >= 256 || SmallImage.smallImg[id][3] >= 256 || SmallImage.smallImg[id][2] >= 256 || SmallImage.smallImg[id][4] >= 256)
+					if (id < 0 || id >= SmallImage.smallImg.Length || SmallImage.smallImg[id] == null || id >= SmallImage.imgNew.Length || SmallImage.smallImg[id][1] >= 256 || SmallImage.smallImg[id][3] >= 256 || SmallImage.smallImg[id][2] >= 256 || SmallImage.smallImg[id][4] >= 256)
 					{
 						Small small2 = SmallImage.imgNew[id];
 						if (small2 == null)
@@ -174,6 +182,10 @@ namespace Game1
 		// Token: 0x06003843 RID: 14403 RVA: 0x0036F8EC File Offset: 0x0036DAEC
 		public static void drawSmallImage(mGraphics g, int id, int f, int x, int y, int w, int h, int transform, int anchor)
 		{
+			if (id < 0 || SmallImage.imgNew == null || id >= SmallImage.imgNew.Length)
+			{
+				return;
+			}
 			if (SmallImage.imgbig == null)
 			{
 				Small small = SmallImage.imgNew[id];
@@ -201,7 +213,7 @@ namespace Game1
 					}
 					return;
 				}
-				if (id >= SmallImage.smallImg.Length || SmallImage.smallImg[id] == null || SmallImage.smallImg[id][1] >= 256 || SmallImage.smallImg[id][3] >= 256 || SmallImage.smallImg[id][2] >= 256 || SmallImage.smallImg[id][4] >= 256)
+				if (id < 0 || id >= SmallImage.smallImg.Length || SmallImage.smallImg[id] == null || id >= SmallImage.imgNew.Length || SmallImage.smallImg[id][1] >= 256 || SmallImage.smallImg[id][3] >= 256 || SmallImage.smallImg[id][2] >= 256 || SmallImage.smallImg[id][4] >= 256)
 				{
 					Small small3 = SmallImage.imgNew[id];
 					if (small3 == null)
